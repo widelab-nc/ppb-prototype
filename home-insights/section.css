@@ -42,7 +42,7 @@
   --slide-gap:   1rem;      /* 16 — między kartami (JS: spaceBetween) */
   --shape-size: 11.875rem;  /* 190 */
   --media-size: 11.375rem;  /* 182 */
-  --media-object-w: 55%;    /* placeholder fiolki wewnątrz koła */
+  --media-object-w: 100%;   /* fiolka wypełnia koło (Tomek 2026-07-27; było 55% pod placeholder SVG) */
   --decor-h:    1.25rem;    /* 20  */
   --more-gap:   0.375rem;   /* 6   */
   --arrow-size: 1.25rem;    /* 20  */
@@ -269,7 +269,7 @@
     --slide-gap: 1rem;        /* 16  */
     --shape-size: 9rem;       /* 144 */
     --media-size: 8.625rem;   /* 138 */
-    --media-object-w: 59%;
+    --media-object-w: 100%;  /* jw. — było 59% */
     --decor-h: 1rem;          /* 16  */
     --more-gap: 0.284rem;     /* 4.55 */
     --arrow-size: 1.125rem;   /* 18  */
