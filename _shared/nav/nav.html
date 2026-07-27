@@ -1,0 +1,139 @@
+<!-- ============================================================
+     Polpharma Biologics — NAVBAR partial (_shared/nav/nav.html)
+     Wklejany 1:1 na początek <body> każdej strony prototypu.
+     Wymaga: styleguide.css + nav.css + nav-shape.js + nav-menu.js
+     (+ nav-mask.js, jeśli strona ma jasne sekcje:
+      data-nav-theme="light" + initNavMask()).
+     W Webflow: komponent nav + embed (svg-defs, maska).
+
+     Figma: dark 3885:3085 / light 4473:6892 / dropdown 5051:3580
+     mobile-closed 4473:6110 / mobile-open 4473:6772.
+     ============================================================ -->
+
+<!-- Wspólne defs dla navbara: inner shadow wariantu dark (Figma: FFFFFF 15%, X -1.13 Y 1.13, blur 2.26)
+     — musi być RAZ w DOM strony (Webflow: embed z ukrytym svg) -->
+<svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="navInnerShadow" color-interpolation-filters="sRGB">
+      <feColorMatrix in="SourceAlpha" type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dx="-1.12875" dy="1.12875"/>
+      <feGaussianBlur stdDeviation="1.12875"/>
+      <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+      <feColorMatrix type="matrix"
+        values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.15 0"/>
+      <feBlend mode="normal" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- ============ NAV (site-level, fixed) — wersja BIAŁA (ciemne tła) ============ -->
+<header class="nav_component" data-reveal="ui">
+  <a href="#" class="nav_brand">
+    <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+  </a>
+  <nav class="nav_links-component is-dark-bg" aria-label="Main navigation">
+    <div class="nav_menu">
+      <div class="nav_menu-blur" aria-hidden="true"></div>
+      <svg class="nav_menu-bg" height="42" aria-hidden="true">
+        <path class="nav_menu-shape" d=""/>
+      </svg>
+      <!-- dropdown trigger + panel (Figma 5051:3580) -->
+      <span class="nav_drop">
+        <a href="#" class="nav_link is-b-s is-drop" aria-haspopup="true" aria-expanded="false">
+          Company
+          <svg class="nav_link-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+          </svg>
+        </a>
+        <div class="nav_dropdown" role="menu">
+          <a href="#" class="nav_dropdown-link is-b-s" role="menuitem">About us</a>
+          <a href="#" class="nav_dropdown-link is-b-s" role="menuitem">What we do</a>
+        </div>
+      </span>
+      <a href="#" class="nav_link is-b-s">Pipeline</a>
+      <a href="#" class="nav_link is-b-s">Partnerships</a>
+      <a href="#" class="nav_link is-b-s">Insights</a>
+      <a href="#" class="nav_link is-b-s">Careers</a>
+    </div>
+    <a href="#" class="nav_cta">
+      <span class="is-b-s is-emphasis is-text-lab-white">Contact</span>
+    </a>
+  </nav>
+
+  <!-- hamburger (≤991px) — czerwona pigułka, Figma 4473:6110 -->
+  <button class="nav_hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navMobile">
+    <span class="nav_hamburger-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+</header>
+
+<!-- ============ NAV MASK (system #2) — kopia LIGHT-BG, tnie ją clip-path ============ -->
+<div class="nav-mask_component" aria-hidden="true">
+  <div class="nav-mask_inner">
+    <header class="nav_component is-dark">
+      <span class="nav_brand">
+        <img class="nav_brand-logo" src="../_shared/nav/logo-dark.svg" alt="Polpharma Biologics" />
+      </span>
+      <nav class="nav_links-component is-light-bg">
+        <div class="nav_menu">
+          <div class="nav_menu-blur" aria-hidden="true"></div>
+          <svg class="nav_menu-bg" height="42" aria-hidden="true">
+            <path class="nav_menu-shape" d=""/>
+          </svg>
+          <span class="nav_drop">
+            <span class="nav_link is-b-s is-drop">
+              Company
+              <svg class="nav_link-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+              </svg>
+            </span>
+            <div class="nav_dropdown">
+              <span class="nav_dropdown-link is-b-s">About us</span>
+              <span class="nav_dropdown-link is-b-s">What we do</span>
+            </div>
+          </span>
+          <span class="nav_link is-b-s">Pipeline</span>
+          <span class="nav_link is-b-s">Partnerships</span>
+          <span class="nav_link is-b-s">Insights</span>
+          <span class="nav_link is-b-s">Careers</span>
+        </div>
+        <span class="nav_cta">
+          <span class="is-b-s is-emphasis is-text-lab-white">Contact</span>
+        </span>
+      </nav>
+    </header>
+  </div>
+</div>
+
+<!-- ============ GET IN TOUCH (site-level, fixed, desktop) ============ -->
+<a href="#" class="contact-cta_component" data-reveal="ui">
+  <span class="contact-cta_dots" aria-hidden="true"></span>
+  <span class="is-b-s contact-cta_label">Get in touch</span>
+</a>
+
+<!-- ============ MOBILE MENU (pełnoekranowy overlay, Figma 4473:6772) ============ -->
+<div class="nav-mobile" id="navMobile" aria-hidden="true">
+  <div class="nav-mobile_bar">
+    <span class="nav_brand">
+      <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+    </span>
+    <button class="nav-mobile_close" type="button" aria-label="Close menu">
+      <svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <nav class="nav-mobile_list" aria-label="Mobile navigation">
+    <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">About us</span></a>
+    <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">What we do</span></a>
+    <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Pipeline</span></a>
+    <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Partnerships</span></a>
+    <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Insights</span></a>
+    <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Careers</span></a>
+    <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Contact</span></a>
+  </nav>
+  <a href="#" class="nav-mobile_cta">
+    <span class="nav-mobile_cta-dots" aria-hidden="true"></span>
+    <span class="is-b-s is-emphasis is-text-lab-white">Get in touch</span>
+  </a>
+</div>

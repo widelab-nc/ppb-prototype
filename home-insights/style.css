@@ -1,0 +1,81 @@
+/* ============================================================
+   HOME — INSIGHTS · powłoka PROTOTYPU standalone
+   Style sekcji siedzą w `section.css` (to jest deliverable — ten plik NIE).
+   Tu tylko to, czego na prawdziwej stronie dostarcza warstwa site-level:
+   skalowanie root font-size + styl panelu strojenia parallaxu.
+   ============================================================ */
+@import url("section.css");
+
+/* ============================================================
+   FLUID ROOT FONT-SIZE — GLOBALNE skalowanie strony.
+   Kopia z `home-full/style.css`; na site to warstwa site-level (Webflow),
+   tu jest lokalnie, żeby standalone prototyp zachowywał się jak strona.
+   ⚠️ Nadpisuje _shared html{font-size:16px}.
+
+   DRABINKA (ciągła, oparta na DWÓCH artboardach z Figmy — oba rysowane przy rem 16):
+     ≤767      16px stałe      ← artboard MOBILE 375 (`4473:6648`): heading 36 = 2.25rem×16,
+                                 title 24 = 1.5rem×16, padding 20 = 1.25rem×16
+     767→991   16 → 11         ← tablet: layout desktopowy kurczy się proporcjonalnie
+     991→1440  11 → 16         ← 11 = 991/1440×16, żeby rama 1440 zmieściła się do 992
+     >1440     16 → 19         ← artboard DESKTOP 1440 (`4473:4434`)
+   Sąsiednie pasma stykają się wartościami → zero skoku przy resize.
+   Granica pasm 767 = granica LAYOUTU (slider ↔ stack), więc zmiana skali
+   pokrywa się ze zmianą układu.
+   ============================================================ */
+:root {
+  --font-from: 16;
+  --font-to: 19;
+  --vw-from: calc(1440 / 100);
+  --vw-to: calc(1889 / 100);
+  --coefficient: calc((var(--font-to) - var(--font-from)) / (var(--vw-to) - var(--vw-from)));
+  --base: calc((var(--font-from) - var(--vw-from) * var(--coefficient)) / 16);
+
+  --container-gutter: max(2rem, calc((100vw - 86rem) / 2));
+}
+html { font-size: calc(var(--base) * 1rem + var(--coefficient) * 1vw); }
+
+@media screen and (max-width: 1440px) {
+  :root { --font-from: 11; --font-to: 16; --vw-from: calc(991 / 100); --vw-to: calc(1440 / 100); }
+}
+@media screen and (max-width: 991px) {
+  :root { --font-from: 16; --font-to: 11; --vw-from: calc(767 / 100); --vw-to: calc(991 / 100); }
+}
+@media screen and (max-width: 767px) {
+  /* stałe 16 = baza artboardu mobile → sekcja jest pixel-perfect na 375
+     i skaluje się tylko szerokością (karta 100%), nie rozmiarem tekstu. */
+  :root { --font-from: 16; --font-to: 16; --vw-from: calc(320 / 100); --vw-to: calc(767 / 100); }
+}
+
+/* ============================================================
+   PANEL STROJENIA PARALLAXU (tylko prototyp — nie idzie do Webflow)
+   ============================================================ */
+.lag-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 9999;
+  width: 15rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(22, 21, 23, 0.9);
+  color: #fff;
+  font: 400 12px/1.4 ui-monospace, monospace;
+  backdrop-filter: blur(8px);
+}
+.lag-panel[hidden] { display: none; }
+.lag-panel h4 { font-size: 12px; margin-bottom: 0.5rem; opacity: 0.6; font-weight: 400; }
+.lag-panel label { display: block; margin-bottom: 0.4rem; }
+.lag-panel input[type="range"] { width: 100%; }
+.lag-panel .lag-panel_row { opacity: 0.55; margin-bottom: 0.6rem; }
+.lag-panel .lag-panel_group {
+  margin-bottom: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.lag-panel .lag-panel_group i {
+  display: block;
+  font-style: normal;
+  margin-bottom: 0.35rem;
+  color: #16ABA9;
+}
+.lag-panel .lag-panel_hint { opacity: 0.45; margin-top: 0.5rem; }

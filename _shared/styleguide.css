@@ -1,0 +1,176 @@
+/* ============================================================
+   Polpharma Biologics — GLOBALNY STYLE GUIDE (prototypy)
+   Fizyczny odpowiednik style guide'u z Webflow
+   (site polpharmaxwidehue, 6a55f3bb4b824306906ca274).
+   ŹRÓDŁO PRAWDY = Webflow; wartości tu = zweryfikowane 1:1
+   z Figmą (style-guide.md w vaulcie).
+
+   ZASADA: żaden prototyp NICZEGO z tego pliku nie redefiniuje.
+   Brakuje czegoś globalnego → dopisz TU + odnotuj w style-guide.md.
+   ============================================================ */
+
+:root {
+  /* ---------- Colors (kolekcja Colors) ---------- */
+  --deep-green: #005453;
+  --vibrant-green: #16ABA9;
+  --light-green: #C6ECEB;
+  --lab-white: #FFFFFF;
+  --black: #161517;
+  --red: #F55D5D;
+  --mist: #E6EFEF;
+  --light-stroke: hsla(0, 0%, 100%, 0.15);
+  --dark-stroke: hsla(0, 0%, 0%, 0.15);
+
+  /* ---------- Typography families ---------- */
+  /* Heading = Concrette M Regular 400 (NIE 500!), Title/Body/Caption = Season Sans.
+     Brakujące pliki: Season Sans Regular 400 (body → renderuje na Medium)
+     i Bold 700 (emphasis → faux-bold). Po dograniu podmiana TYLKO tutaj. */
+  --heading-family: "Concrette M", sans-serif;
+  --body-family: "Season Sans", sans-serif;
+}
+
+/* ---------- @font-face (jedna kopia: _shared/fonts/) ---------- */
+@font-face {
+  font-family: "Concrette M";
+  src: url("fonts/ConcretteM-Regular.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Season Sans";
+  src: url("fonts/SeasonSans-Medium.woff2") format("woff2");
+  font-weight: 500; /* mamy tylko Medium; sloty na 400/700 po dostarczeniu plików */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- reset / base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: var(--body-family);
+  background: var(--lab-white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
+a { text-decoration: none; color: inherit; }
+video { display: block; }
+
+/* ============================================================
+   TYPOGRAFIA — klasy is-* (1:1 z Webflow / Figma)
+   fs w rem, lh bezjednostkowo, letter-spacing ZAWSZE w em
+   (Figma podaje %: −4 → −0.04em). Headingi: ss01 OBOWIĄZKOWE.
+   Responsywność = odpowiednik modów kolekcji Typography
+   (Tablet ≤991, Mobile ≤767).
+   ============================================================ */
+.is-h-l   { font-family: var(--heading-family); font-weight: 400; font-size: 5rem;    line-height: 1.0;  letter-spacing: -0.04em; font-feature-settings: "ss01" 1; }
+.is-h-m   { font-family: var(--heading-family); font-weight: 400; font-size: 3.75rem; line-height: 1.08; letter-spacing: -0.04em; font-feature-settings: "ss01" 1; }
+.is-h-s   { font-family: var(--heading-family); font-weight: 400; font-size: 2.5rem;  line-height: 1.12; letter-spacing: -0.04em; font-feature-settings: "ss01" 1; }
+.is-t-l   { font-family: var(--body-family); font-weight: 500; font-size: 2rem;     line-height: 1.16; letter-spacing: -0.03em; } /* POTWIERDZONE z Figmy 2026-07-24 (Desktop/Title/Title Large: letterSpacing −3% → −0.03em) */
+.is-t-m   { font-family: var(--body-family); font-weight: 500; font-size: 1.5rem;   line-height: 1.24; letter-spacing: -0.01em; }
+.is-t-s   { font-family: var(--body-family); font-weight: 500; font-size: 1.25rem;  line-height: 1.32; letter-spacing: 0; }
+.is-b-l   { font-family: var(--body-family); font-weight: 400; font-size: 1.125rem; line-height: 1.44; }
+.is-b-m   { font-family: var(--body-family); font-weight: 400; font-size: 1rem;     line-height: 1.44; }
+.is-b-s   { font-family: var(--body-family); font-weight: 400; font-size: 0.875rem; line-height: 1.44; }
+.is-caption { font-family: var(--body-family); font-weight: 400; font-size: 0.75rem; line-height: 1.0; letter-spacing: 0.01em; }
+
+/* Tablet (Webflow: medium, ≤991) — letter-spacing BEZ zmian na breakpointach */
+@media (max-width: 991px) {
+  .is-h-l { font-size: 3.75rem; line-height: 1.0; }
+  .is-h-m { font-size: 3.25rem; line-height: 1.08; }
+  .is-h-s { font-size: 2.75rem; line-height: 1.08; }
+  .is-t-l { font-size: 1.75rem; line-height: 1.2; }
+}
+/* Mobile (Webflow: small, ≤767) */
+@media (max-width: 767px) {
+  .is-h-l { font-size: 2.25rem;  line-height: 1.04; }
+  .is-h-m { font-size: 2rem;     line-height: 1.12; }
+  .is-h-s { font-size: 1.75rem;  line-height: 1.12; }
+  .is-t-l { font-size: 1.5rem;   line-height: 1.2; }
+  .is-t-m { font-size: 1.25rem;  line-height: 1.24; }
+  .is-t-s { font-size: 1.125rem; line-height: 1.32; }
+  .is-b-l { font-size: 1rem;     line-height: 1.44; }
+}
+
+/* Emphasis: combo na body → Bold 700 (do czasu wgrania pliku = faux-bold) */
+.is-emphasis { font-weight: 700; }
+
+/* Measure — globalna utility max-width tekstu (676px) */
+.is-max-w-text { max-width: 42.25rem; }
+
+/* ============================================================
+   KOLORY — klasy tekstu i tła (podpięte pod zmienne)
+   ============================================================ */
+.is-text-deep-green    { color: var(--deep-green); }
+.is-text-vibrant-green { color: var(--vibrant-green); }
+.is-text-light-green   { color: var(--light-green); }
+.is-text-lab-white     { color: var(--lab-white); }
+.is-text-black         { color: var(--black); }
+.is-text-red           { color: var(--red); }
+.is-text-mist          { color: var(--mist); }
+/* z żywego Webflow (używane przez Maćka) — do potwierdzenia jako kanon */
+.is-text-o50           { opacity: 0.5; }
+
+.is-bg-deep-green    { background-color: var(--deep-green); }
+.is-bg-vibrant-green { background-color: var(--vibrant-green); }
+.is-bg-light-green   { background-color: var(--light-green); }
+.is-bg-lab-white     { background-color: var(--lab-white); }
+.is-bg-black         { background-color: var(--black); }
+.is-bg-red           { background-color: var(--red); }
+.is-bg-mist          { background-color: var(--mist); }
+
+/* ============================================================
+   STRUKTURA — section → container → component
+   ============================================================ */
+.section {
+  position: relative;
+  /* pionowy default 80; poziomy 32 (≤991: 24, ≤767: 16).
+     ⚠️ ZMIANA 2026-07-24: poziomy padding 48 → 32 (decyzja Tomka, za Figmą).
+     Konsekwencja: .container rośnie 84rem → 86rem, żeby na 1440 content
+     miał dokładnie 1376px = szerokość ramki z Figmy. */
+  padding: 5rem 2rem;
+}
+.container {
+  max-width: 86rem; /* 1376 = 1440 − 2×32 */
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 991px) { .section { padding-left: 1.5rem; padding-right: 1.5rem; } }
+@media (max-width: 767px) { .section { padding-left: 1rem;   padding-right: 1rem; } }
+
+/* ============================================================
+   WARSTWA REVEAL (system #1) — stany początkowe + maski linii
+   ============================================================ */
+/* FOUC guard: wszystko z data-reveal startuje ukryte, JS pokazuje */
+[data-reveal] { opacity: 0; visibility: hidden; }
+
+/* .rv-line = maska linii (SplitText); padding/margin .16em → descendery
+   mieszczą się w masce BEZ zmiany interlinii. .rv-line-in = animowany wrapper. */
+.rv-line {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+.rv-line-in { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-line-in { transform: none !important; }
+}
+
+/* ============================================================
+   WARSTWA HIGHLIGHT (system #4) — stan początkowy
+   Tekst doświetlany scrollem: jednostki (słowa/litery) startują przygaszone,
+   JS (_shared/highlight.js) podnosi opacity do 1 w rytm scrolla.
+   ⚠️ Wartość opacity MUSI być zgodna z PPB.config.highlight.from
+   (gsap-config.js) — tu jest po to, żeby nie było FOUC przed startem JS.
+   ============================================================ */
+.hl-unit { opacity: 0.22; will-change: opacity; }
+/* przy podziale na litery: wyraz nie może się łamać w środku */
+.hl-word { display: inline-block; white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hl-unit { opacity: 1 !important; }
+}
+

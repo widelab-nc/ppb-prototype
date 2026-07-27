@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polpharma Biologics — Insights (prototyp sekcji)</title>
+
+  <link rel="preload" href="../_shared/fonts/ConcretteM-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="../_shared/fonts/SeasonSans-Medium.woff2" as="font" type="font/woff2" crossorigin />
+
+  <!-- warstwa globalna (_shared) → potem TYLKO custom sekcji -->
+  <link rel="stylesheet" href="../_shared/styleguide.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       INSIGHTS — Figma node 4473:4434 (fileKey eamVOAaNZDwHQKofLeV2Il)
+       Slider: swiper 12, free-mode drag, przycięty w prawo (bleed).
+       Taby (All insights / Company news / …) — POMINIĘTE (decyzja Tomka).
+       ============================================================ -->
+  <section class="section is-home-insights" data-lag-tune>
+
+    <!-- dekor: dwa panele z obrysem, przycięte u góry sekcji (Figma 4473:4436) -->
+    <div class="container">
+      <div class="home-insights_decor" aria-hidden="true">
+        <div class="home-insights_decor-panel"></div>
+        <div class="home-insights_decor-panel"></div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="home-insights_head">
+        <h2 class="is-h-l is-text-deep-green home-insights_heading">Insights</h2>
+      </div>
+    </div>
+
+    <!-- Slider siedzi W KONTENERZE — tak jak heading i dekor. Box slidera = box
+         kontenera, więc przy skrajnym przewinięciu w prawo prawa krawędź ostatniej
+         karty równa się prawej krawędzi kontenera (nie okna).
+         Karty wystające poza kontener są widoczne (slider ma overflow: visible)
+         i przycina je dopiero SEKCJA (overflow-x: clip). -->
+    <div class="container">
+      <div class="home-insights_slider swiper">
+        <div class="home-insights_list swiper-wrapper">
+
+          <!-- ── karta 1 — light ───────────────────────────────── -->
+          <article class="home-insights_card is-light swiper-slide">
+            <a href="#" class="home-insights_card-link">
+              <div class="home-insights_card-top">
+                <div class="home-insights_date" data-lag-group="date">
+                  <span class="is-caption" data-lag>22</span>
+                  <span class="home-insights_date-dot" data-lag></span>
+                  <span class="is-caption" data-lag>10</span>
+                  <span class="is-caption" data-lag>2026</span>
+                </div>
+                <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Company expands biosimilar pipeline with new oncology candidate</h3>
+              </div>
+
+              <div class="home-insights_card-bottom" data-lag-group="shapes">
+                <!-- element 1 (parallax: dogania szybciej) -->
+                <div class="home-insights_media" data-lag>
+                  <img class="home-insights_media-img" src="assets/placeholder-lab.svg" alt="" />
+                </div>
+
+                <!-- element 2 (parallax: dogania później) -->
+                <div class="home-insights_more" data-lag>
+                  <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                          d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                  </svg>
+                  <span class="home-insights_more-label">
+                    <span class="is-t-s">More</span>
+                    <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- ── karta 2 — dark gradient ───────────────────────── -->
+          <article class="home-insights_card is-dark swiper-slide">
+            <a href="#" class="home-insights_card-link">
+              <div class="home-insights_card-top">
+                <div class="home-insights_date" data-lag-group="date">
+                  <span class="is-caption" data-lag>08</span>
+                  <span class="home-insights_date-dot" data-lag></span>
+                  <span class="is-caption" data-lag>10</span>
+                  <span class="is-caption" data-lag>2026</span>
+                </div>
+                <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Physician guide to biosimilar adoption and switching</h3>
+              </div>
+
+              <div class="home-insights_card-bottom" data-lag-group="shapes">
+                <div class="home-insights_media" data-lag></div>
+                <div class="home-insights_more" data-lag>
+                  <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                          d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                  </svg>
+                  <span class="home-insights_more-label">
+                    <span class="is-t-s">More</span>
+                    <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- ── karta 3 — vibrant ─────────────────────────────── -->
+          <article class="home-insights_card is-vibrant swiper-slide">
+            <a href="#" class="home-insights_card-link">
+              <div class="home-insights_card-top">
+                <div class="home-insights_date" data-lag-group="date">
+                  <span class="is-caption" data-lag>16</span>
+                  <span class="home-insights_date-dot" data-lag></span>
+                  <span class="is-caption" data-lag>9</span>
+                  <span class="is-caption" data-lag>2026</span>
+                </div>
+                <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Professionals who share a commitment to excellence and patient impact.</h3>
+              </div>
+
+              <div class="home-insights_card-bottom" data-lag-group="shapes">
+                <div class="home-insights_media" data-lag>
+                  <img class="home-insights_media-object" src="assets/placeholder-vial.svg" alt="" />
+                </div>
+                <div class="home-insights_more" data-lag>
+                  <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                          d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                  </svg>
+                  <span class="home-insights_more-label">
+                    <span class="is-t-s">More</span>
+                    <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- ── karta 4 — light (dodatkowa, żeby było co ciągnąć) ── -->
+          <article class="home-insights_card is-light swiper-slide">
+            <a href="#" class="home-insights_card-link">
+              <div class="home-insights_card-top">
+                <div class="home-insights_date" data-lag-group="date">
+                  <span class="is-caption" data-lag>02</span>
+                  <span class="home-insights_date-dot" data-lag></span>
+                  <span class="is-caption" data-lag>9</span>
+                  <span class="is-caption" data-lag>2026</span>
+                </div>
+                <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Manufacturing capacity milestone reached at Duchnice site</h3>
+              </div>
+
+              <div class="home-insights_card-bottom" data-lag-group="shapes">
+                <div class="home-insights_media" data-lag>
+                  <img class="home-insights_media-img" src="assets/placeholder-lab.svg" alt="" />
+                </div>
+                <div class="home-insights_more" data-lag>
+                  <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                          d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                  </svg>
+                  <span class="home-insights_more-label">
+                    <span class="is-t-s">More</span>
+                    <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

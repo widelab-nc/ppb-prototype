@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bottle Dup Lab — tuning per butelka</title>
+<style>
+  :root { --mist:#E6EFEF; --deep:#005453; }
+  * { box-sizing: border-box; }
+  html,body { margin:0; height:100%; font-family: system-ui, sans-serif; }
+  #stage { position: fixed; inset: 0; overflow: hidden; background: var(--mist); }
+  #stage.dark { background: #05201f; }
+  #bg { position: absolute; inset: 0; background-repeat: no-repeat;
+        background-position: center; pointer-events: none; }
+  .bottle {
+    position: absolute; left: 50%; top: 50%; height: auto;
+    will-change: transform; user-select: none; cursor: pointer;
+    opacity: .5; /* półprzezroczyste — do naprowadzania na tło */
+  }
+  .bottle.active { outline: 2px dashed #f55d5d; outline-offset: 2px; }
+  #centerline { position: fixed; left: 50%; top: 0; bottom: 0; width: 1px;
+    background: rgba(0,84,83,.25); pointer-events: none; }
+  #centerline.hidden { display: none; }
+
+  #panel {
+    position: fixed; top: 12px; right: 12px; width: 330px; max-height: calc(100vh - 24px);
+    overflow: auto; background: #fff; border: 1px solid #d5e0e0; border-radius: 12px;
+    padding: 14px 16px; box-shadow: 0 8px 30px rgba(0,0,0,.12); z-index: 100; font-size: 13px;
+  }
+  #panel h2 { margin: 4px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing:.04em; color: var(--deep); }
+  #panel h2:not(:first-child) { margin-top: 14px; border-top: 1px solid #eef3f3; padding-top: 10px; }
+  .row { display:flex; align-items:center; gap:8px; margin: 6px 0; }
+  .row label { flex: 0 0 110px; color:#334; }
+  .row input[type=range] { flex: 1; }
+  .row output { flex: 0 0 46px; text-align: right; font-variant-numeric: tabular-nums; }
+  .tabs { display:flex; gap:6px; margin: 4px 0 8px; }
+  .tabs button { flex:1; padding:7px 0; border:1px solid #cfe; border-radius:8px; background:#f2f9f9;
+    color:var(--deep); font-weight:600; cursor:pointer; }
+  .tabs button.on { background: var(--deep); color:#fff; border-color: var(--deep); }
+  .toggles { display:flex; gap:14px; margin: 8px 0 2px; flex-wrap: wrap; }
+  .toggles label { flex:none; display:flex; gap:5px; align-items:center; color:#334; }
+  textarea { width:100%; height:150px; margin-top:8px; font-family: ui-monospace, monospace;
+    font-size:11px; border:1px solid #d5e0e0; border-radius:8px; padding:8px; resize:vertical; }
+  button.act { margin-top:6px; width:100%; padding:8px; border:0; border-radius:8px;
+    background:var(--deep); color:#fff; font-weight:600; cursor:pointer; }
+  .file { margin: 4px 0 2px; }
+  .hint { color:#789; font-size:11px; margin: 2px 0 0; }
+</style>
+</head>
+<body>
+  <div id="stage"><div id="bg"></div></div>
+  <div id="centerline"></div>
+
+  <div id="panel">
+    <h2>Tło (placeholder)</h2>
+    <input class="file" type="file" id="bgFile" accept="image/*" />
+    <div class="row"><label>bg scale</label><input type="range" id="bgScale" min="20" max="140" step="1" value="70"><output></output></div>
+    <div class="row"><label>bg X</label><input type="range" id="bgX" min="-400" max="400" step="1" value="0"><output></output></div>
+    <div class="row"><label>bg Y</label><input type="range" id="bgY" min="-400" max="400" step="1" value="0"><output></output></div>
+    <div class="row"><label>bg opacity</label><input type="range" id="bgOpacity" min="0" max="100" step="1" value="100"><output></output></div>
+
+    <h2>Globalne (wszystkie butelki)</h2>
+    <div class="row"><label>bottleScale (baza)</label><input type="range" id="bottleScale" min="0.2" max="1.6" step="0.01" value="0.56"><output></output></div>
+    <div class="row"><label>rotation°</label><input type="range" id="rotation" min="-45" max="45" step="1" value="-22"><output></output></div>
+
+    <h2>Butelka — wybierz i ustaw</h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="row"><label>xPercent</label><input type="range" id="bx" min="-260" max="160" step="1" value="0"><output></output></div>
+    <div class="row"><label>yPercent</label><input type="range" id="by" min="-130" max="20" step="1" value="-50"><output></output></div>
+    <div class="row"><label>scale</label><input type="range" id="bs" min="0.3" max="1.8" step="0.01" value="1"><output></output></div>
+    <p class="hint">z-index automatycznie wg scale (większa = wyżej). Klik na butelkę też ją wybiera. Butelki są na opacity 50% do naprowadzania.</p>
+
+    <div class="toggles">
+      <label><input type="checkbox" id="dark" /> ciemne tło</label>
+      <label><input type="checkbox" id="cl" checked /> linia środka</label>
+    </div>
+
+    <h2>Output do wklejenia</h2>
+    <textarea id="out" readonly></textarea>
+    <button class="act" id="copy">Kopiuj</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script>
+    const FRAME = { w:1920, h:1080, shapeW:648 };
+    const shapeW = () => FRAME.shapeW * Math.max(innerWidth/FRAME.w, innerHeight/FRAME.h);
+
+    const N = 4;
+    // stan per butelka (start: drabinka lewo→prawo, największa lewa) — DOSTRÓJ na tło
+    const B = [
+      { x:-150, y:-46, scale:1.00 },
+      { x: -60, y:-52, scale:0.85 },
+      { x:  20, y:-60, scale:0.72 },
+      { x:  95, y:-68, scale:0.60 },
+    ];
+    let active = 0;
+
+    const stage = document.getElementById("stage");
+    const bg = document.getElementById("bg");
+    const imgs = [];
+    for (let i=0;i<N;i++){ const im=document.createElement("img"); im.src="assets/bottle-v3.png";
+      im.className="bottle"; im.dataset.i=i; im.addEventListener("click",()=>{active=+im.dataset.i;syncTabs();loadActive();render();});
+      stage.appendChild(im); imgs.push(im); }
+
+    // taby wyboru butelki
+    const tabs = document.getElementById("tabs");
+    for (let i=0;i<N;i++){ const b=document.createElement("button"); b.textContent=(i+1); b.dataset.i=i;
+      b.addEventListener("click",()=>{active=i;syncTabs();loadActive();render();}); tabs.appendChild(b); }
+    function syncTabs(){ [...tabs.children].forEach((b,i)=>b.classList.toggle("on",i===active)); }
+
+    const G = { bottleScale:g("bottleScale"), rotation:g("rotation") };
+    const bgc = { bgScale:g("bgScale"), bgX:g("bgX"), bgY:g("bgY"), bgOpacity:g("bgOpacity") };
+    const bx=g("bx"), by=g("by"), bs=g("bs");
+    function g(id){ return document.getElementById(id); }
+    function num(inp){ const v=parseFloat(inp.value); inp.nextElementSibling.value=inp.value; return v; }
+
+    function loadActive(){ bx.value=B[active].x; by.value=B[active].y; bs.value=B[active].scale; }
+    [bx,by,bs].forEach(inp=>inp.addEventListener("input",()=>{ B[active].x=num(bx); B[active].y=num(by); B[active].scale=num(bs); render(); }));
+    Object.values(G).concat(Object.values(bgc)).forEach(inp=>inp.addEventListener("input",render));
+    ["dark","cl"].forEach(id=>g(id).addEventListener("change",render));
+    addEventListener("resize",render);
+
+    g("bgFile").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f)return;
+      bg.style.backgroundImage=`url(${URL.createObjectURL(f)})`; render(); });
+
+    function render(){
+      const baseW = shapeW()*num(G.bottleScale);
+      const rot = num(G.rotation);
+      // tło
+      const sc=num(bgc.bgScale), bxx=num(bgc.bgX), byy=num(bgc.bgY), op=num(bgc.bgOpacity);
+      bg.style.backgroundSize = sc+"%";
+      bg.style.backgroundPosition = `calc(50% + ${bxx}px) calc(50% + ${byy}px)`;
+      bg.style.opacity = op/100;
+      stage.classList.toggle("dark", g("dark").checked);
+      g("centerline").classList.toggle("hidden", !g("cl").checked);
+      // butelki
+      imgs.forEach((im,i)=>{
+        im.classList.toggle("active", i===active);
+        gsap.set(im,{ width:baseW, xPercent:B[i].x, yPercent:B[i].y, scale:B[i].scale,
+          rotation:rot, zIndex: Math.round(B[i].scale*1000) });
+      });
+      writeOut();
+    }
+    function writeOut(){
+      const lines = B.map((b,i)=>`  { x:${b.x}, y:${b.y}, scale:${b.scale} },   // ${i+1}`).join("\n");
+      g("out").value =
+`bottleScale: ${num(G.bottleScale)},
+bottleUpright: ${num(G.rotation)},   // rotation°
+// per butelka (xPercent, yPercent, scale) — lewa→prawa:
+dupPositions: [
+${lines}
+],`;
+    }
+    g("copy").addEventListener("click",()=>{ navigator.clipboard.writeText(g("out").value);
+      const b=g("copy"),t=b.textContent; b.textContent="Skopiowane ✓"; setTimeout(()=>b.textContent=t,1200); });
+
+    imgs[0].addEventListener("load",render);
+    syncTabs(); loadActive(); render();
+  </script>
+</body>
+</html>

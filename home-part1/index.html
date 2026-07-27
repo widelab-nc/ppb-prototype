@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polpharma Biologics — Home prototype</title>
+  <link rel="preload" href="../_shared/fonts/ConcretteM-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="../_shared/fonts/SeasonSans-Medium.woff2" as="font" type="font/woff2" crossorigin />
+  <!-- warstwa globalna (_shared) → potem TYLKO custom strony -->
+  <link rel="stylesheet" href="../_shared/styleguide.css" />
+  <link rel="stylesheet" href="../_shared/nav/nav.css" />
+  <link rel="stylesheet" href="style.css?v=p4" />
+  <!-- INSIGHTS (sekcja home) — style sekcji; skalowanie root font-size dostarcza style.css -->
+</head>
+<body>
+
+  <!-- Wspólne defs dla navbara: inner shadow wariantu dark (Figma: FFFFFF 15%, X -1.13 Y 1.13, blur 2.26)
+       — musi być RAZ w DOM strony (Webflow: embed z ukrytym svg) -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="navInnerShadow" color-interpolation-filters="sRGB">
+        <feColorMatrix in="SourceAlpha" type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+        <feOffset dx="-1.12875" dy="1.12875"/>
+        <feGaussianBlur stdDeviation="1.12875"/>
+        <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.15 0"/>
+        <feBlend mode="normal" in2="SourceGraphic"/>
+      </filter>
+
+      <!-- DOPASOWANIE TONU SEKWENCJI BUTELKI DO TAŚMY (2026-07-26).
+           PNG jest w sRGB, taśma to H.264 (BT.709) — przeglądarka renderuje je inną ścieżką
+           koloru i na styku widać ~3-4 % różnicy. Zmierzone regresją: model GAMMA pasuje
+           z błędem ~1/255, model „jasność" z błędem ~4/255 → stąd feComponentTransfer,
+           a nie filter: brightness(). Wykładnik strojony w key-pillars.js (CONFIG.bottle.gamma).
+           ⚠️ color-interpolation-filters="sRGB" jest KONIECZNE (domyślnie SVG liczy w linearRGB). -->
+      <filter id="bottleMatch" color-interpolation-filters="sRGB">
+        <feComponentTransfer>
+          <feFuncR type="gamma" amplitude="1" exponent="0.874" offset="0"/>
+          <feFuncG type="gamma" amplitude="1" exponent="0.874" offset="0"/>
+          <feFuncB type="gamma" amplitude="1" exponent="0.874" offset="0"/>
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- ============ LOADER (site-level overlay) ============ -->
+  <div class="loader_component">
+    <p class="is-b-m is-text-deep-green loader_caption is-left">Impact-driven</p>
+    <p class="is-b-m is-text-deep-green loader_caption is-right">Biosimilars</p>
+
+    <!-- LOADER: Lottie 01D (zbieżność kształtów + ekspansja koła do deep-green cover) — zastąpiła 2 kształty -->
+    <div class="loader_lottie" aria-hidden="true"></div>
+  </div>
+
+  <!-- ============ NAV (site-level, fixed) — wersja BIAŁA (ciemne tła) ============ -->
+  <header class="nav_component" data-reveal="ui">
+    <a href="#" class="nav_brand">
+      <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+    </a>
+    <!-- Navigation Links (komponent z _code/navbar/) — wariant DARK-BG (ciemne tła) -->
+    <nav class="nav_links-component is-dark-bg" aria-label="Main navigation">
+      <div class="nav_menu">
+        <div class="nav_menu-blur" aria-hidden="true"></div>
+        <svg class="nav_menu-bg" height="42" aria-hidden="true">
+          <path class="nav_menu-shape" d=""/>
+        </svg>
+        <span class="nav_drop">
+          <a href="#" class="nav_link is-b-s is-drop" aria-haspopup="true" aria-expanded="false">
+            Company
+            <svg class="nav_link-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+            </svg>
+          </a>
+          <div class="nav_dropdown" role="menu">
+            <a href="#" class="nav_dropdown-link is-b-s" role="menuitem">About us</a>
+            <a href="#" class="nav_dropdown-link is-b-s" role="menuitem">What we do</a>
+          </div>
+        </span>
+        <a href="#" class="nav_link is-b-s">Pipeline</a>
+        <a href="#" class="nav_link is-b-s">Partnerships</a>
+        <a href="#" class="nav_link is-b-s">Insights</a>
+        <a href="#" class="nav_link is-b-s">Careers</a>
+      </div>
+      <a href="#" class="nav_cta">
+        <span class="is-b-s is-emphasis is-text-lab-white">Contact</span>
+      </a>
+    </nav>
+
+    <!-- hamburger (≤991px) — czerwona pigułka, Figma 4473:6110 -->
+    <button class="nav_hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navMobile">
+      <span class="nav_hamburger-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+  </header>
+
+  <!-- ============ NAV MASK (system #2: maska koloru na overlayu) ============
+       Warstwa-maska ŚLEDZI krawędź białej sekcji (We know) najeżdżającej na wideo
+       (scrub 1:1 — bez kisielu, krawędź maski = krawędź sekcji co do piksela).
+       W środku PEŁNA CIEMNA wersja nav w TEJ SAMEJ pozycji, kontr-transformowana →
+       krawędź odsłania ciemny nav idealnie na styku. pointer-events: none —
+       klikalny pozostaje bazowy (biały) nav pod spodem. -->
+  <div class="nav-mask_component" aria-hidden="true">
+    <div class="nav-mask_inner">
+      <header class="nav_component is-dark">
+        <span class="nav_brand">
+          <img class="nav_brand-logo" src="../_shared/nav/logo-dark.svg" alt="Polpharma Biologics" />
+        </span>
+        <!-- Navigation Links — wariant LIGHT-BG (jasne tła); spany, bo nieklikalny (mask) -->
+        <nav class="nav_links-component is-light-bg">
+          <div class="nav_menu">
+            <div class="nav_menu-blur" aria-hidden="true"></div>
+            <svg class="nav_menu-bg" height="42" aria-hidden="true">
+              <path class="nav_menu-shape" d=""/>
+            </svg>
+            <span class="nav_drop">
+              <span class="nav_link is-b-s is-drop">
+                Company
+                <svg class="nav_link-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                </svg>
+              </span>
+              <div class="nav_dropdown">
+                <span class="nav_dropdown-link is-b-s">About us</span>
+                <span class="nav_dropdown-link is-b-s">What we do</span>
+              </div>
+            </span>
+            <span class="nav_link is-b-s">Pipeline</span>
+            <span class="nav_link is-b-s">Partnerships</span>
+            <span class="nav_link is-b-s">Insights</span>
+            <span class="nav_link is-b-s">Careers</span>
+          </div>
+          <span class="nav_cta">
+            <span class="is-b-s is-emphasis is-text-lab-white">Contact</span>
+          </span>
+        </nav>
+        <!-- 2026-07-26 FIX: kopia w masce nie mial a hamburgera, wiec przy najezdzie jasnej
+             sekcji bazowy nav byl chowany (`is-nav-covered`), a maska pokazywala SAMO logo
+             - przycisk znikal. Span, nie <button>: kopia jest czysto wizualna
+             (`aria-hidden` + `pointer-events: none`), wiec nie moze byc drugim
+             fokusowalnym kontrolerem w tab-orderze.
+             TU jest to naprawione lokalnie; zrodlo (_shared/nav/nav.html) wymaga tej samej
+             poprawki - patrz MOBILE-PROTOTYPE.md. -->
+        <span class="nav_hamburger" aria-hidden="true">
+          <span class="nav_hamburger-lines"><span></span><span></span><span></span></span>
+        </span>
+      </header>
+    </div>
+  </div>
+
+  <!-- ============ MOBILE MENU (pełnoekranowy overlay, Figma 4473:6772) ============ -->
+  <div class="nav-mobile" id="navMobile" aria-hidden="true">
+    <div class="nav-mobile_bar">
+      <span class="nav_brand">
+        <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+      </span>
+      <button class="nav-mobile_close" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="nav-mobile_list" aria-label="Mobile navigation">
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">About us</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">What we do</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Pipeline</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Partnerships</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Insights</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Careers</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Contact</span></a>
+    </nav>
+    <a href="#" class="nav-mobile_cta">
+      <span class="nav-mobile_cta-dots" aria-hidden="true"></span>
+      <span class="is-b-s is-emphasis is-text-lab-white">Get in touch</span>
+    </a>
+  </div>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section class="section is-home-hero">
+      <!-- tło: Unicorn Studio embed + gradientowy fallback pod spodem (parallax na scroll) -->
+      <div class="home-hero_background" aria-hidden="true">
+        <div class="home-hero_bg-shape is-top"></div>
+        <div class="home-hero_bg-shape is-bottom"></div>
+        <div class="home-hero_unicorn" data-us-project="1fS9tMUsKehA5rXg5ejN"></div>
+        <div class="home-hero_overlay"></div>
+      </div>
+
+      <div class="container">
+        <div class="home-hero_component">
+          <!-- wrapper BEZ data-reveal — to on dostaje scrubowy fade wyjscia hero.
+               Fade NIE moze celowac w h1/podtytul: te maja data-reveal, wiec FOUC guard
+               (`[data-reveal]{opacity:0}`) jest ich stanem poczatkowym i scrub zapisywal
+               go inline jako wartosc START tweena -> tekst gasl i juz nie wracal. -->
+          <div class="home-hero_copy">
+            <h1 class="is-h-l is-text-lab-white home-hero_heading" data-reveal="text">
+              Biosimilarity isn&rsquo;t discovered. It&rsquo;s&nbsp;engineered.
+            </h1>
+            <p class="is-t-s home-hero_subtitle" data-reveal="text">Precision in every molecule.</p>
+          </div>
+
+          <!-- GET IN TOUCH — JEDNA instancja, zero duplikatów.
+               Miejsce w DOM = kolejność MOBILE (pod podtytulem, zwykly flow).
+               Desktop podnosi ja przez position:absolute do prawego dolnego rogu hero
+               (.home-hero_component ma min-height:100vh, wiec jego dol = dol ekranu,
+               a prawa krawedz = prawa krawedz kontenera = --container-gutter). -->
+          <a href="#" class="contact-cta_component" data-reveal="ui">
+            <span class="contact-cta_dots" aria-hidden="true"></span>
+            <span class="is-b-s contact-cta_label">Get in touch</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="home-hero_arrow" data-reveal="ui" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" stroke="#005453" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ PINNED FLOW: How it works → Section-1 → Section-End ============ -->
+    <section class="section is-home-how-it-works">
+      <div class="home-how-it-works_pin">
+
+        <!-- header (znika pod ekspandującą maską) -->
+        <div class="container home-how-it-works_header">
+          <!-- Nawiasy [ ] SIEDZA W TYM SAMYM WRAPPERZE co tekst (2026-07-27).
+               Wczesniej mialy `top: 12.5rem` (kopia paddingu naglowka) i `height: 15.3125rem`
+               (na sztywno wpisana wysokosc bloku) - kazda zmiana paddingu wymagala recznej
+               korekty obu. Teraz `top: 0; bottom: 0` wzgledem wrappera: wysokosc bierze sie
+               z tresci, pozycja z paddingu rodzica. Dwie zduplikowane liczby znikaja. -->
+          <div class="home-how-it-works_copy">
+            <span class="home-how-it-works_bracket" data-reveal="hiw-bracket" aria-hidden="true"></span>
+            <span class="home-how-it-works_bracket is-right" data-reveal="hiw-bracket" aria-hidden="true"></span>
+            <h2 class="is-h-m is-text-lab-white home-how-it-works_heading" data-reveal="hiw-text">
+              Your pure-play<br>biosimilar developer with an<br>international track record.
+            </h2>
+            <p class="is-t-s home-how-it-works_subtitle" data-reveal="hiw-text">Built to accelerate biosimilar pipelines.</p>
+          </div>
+        </div>
+
+        <!-- maska z wideo (rośnie do fullscreen, wideo scrub) -->
+        <div class="home-how-it-works_media-wrapper" aria-hidden="true">
+          <div class="home-how-it-works_media">
+            <video class="home-how-it-works_video" src="assets/hero-seed.mp4" muted playsinline preload="auto"></video>
+          </div>
+        </div>
+
+        <!-- overlay: stats set 1 (Section-1) -->
+        <div class="home-how-it-works_stats is-set-1">
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Approved biosimilars</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">8</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Years biologics expertise</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">12+</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Regulatory standards</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">EMA &middot; FDA</p>
+          </div>
+        </div>
+
+        <!-- overlay: stats set 2 (Section-End) -->
+        <div class="home-how-it-works_stats is-set-2">
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Partners worwide</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">8</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Operating from Zug</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">Switzerland</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Global reach</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">EU &middot; US &middot; MENA +</p>
+          </div>
+        </div>
+
+        <!-- overlay: WHAT WE DO (dół-lewo, wspólny dla obu setów) -->
+        <div class="home-how-it-works_what-we-do">
+          <p class="is-caption is-text-lab-white home-how-it-works_label"><span class="home-how-it-works_label-dot"></span>WHAT WE DO</p>
+          <h3 class="is-h-s is-text-lab-white home-how-it-works_label-heading">We produce impact<br>driven biosimilars. From<br>concept to end market.</h3>
+        </div>
+
+        <!-- ciemny overlay na wideo podczas najazdu następnej sekcji -->
+        <div class="home-how-it-works_dark-overlay" aria-hidden="true"></div>
+
+      </div>
+    </section>
+
+    <!-- ============ WE KNOW (The problem) → OUR GOAL ============
+         REFAKTOR (paczka 2): sekcja WYSOKA, zero GSAP-pinu.
+         - _stage: sticky 100vh (tła: apla + shape'y)
+         - _content: kolumna scrollująca NAD stage'em; teksty = sticky,
+           offsety startowe zgrane tak, że wp1 i tytuł LOCKUJĄ SIĘ równocześnie
+         - _wp1 (50vh, środek ekranu) > _w1 flex column space-between:
+           paragraf → diament (margin auto) → notka — zero absolute
+         - _w2 absolute inset 0 (TE SAME wymiary co w1): teksty Our goal wskakują 1:1
+         - tytuły We know / Our goal w JEDNYM wrapperze (podmiana w miejscu) -->
+    <section class="section is-home-we-know" data-nav-theme="light">
+      <!-- sticky stage — full viewport (odpowiednik dawnego pinu): tła + TYTUŁY -->
+      <div class="home-we-know_stage">
+        <!-- shape + butelki BLUR (warstwa bazowa, pod aplą) — MIRROR aplaShape (4 butelki),
+             tylko rozmyte; apla odkrywa ostrą kopię = "apla zdejmuje blur". Kolejność DOM 1:1 z aplaShape. -->
+        <div class="home-we-know_shape" aria-hidden="true">
+          <img class="feature-shape_svg" src="assets/shape.svg" alt="" />
+          <!-- wrapper 4 rozmytych butelek — opacity fade na GRUPIE (nie per-butelka, żeby przenikanie się nie nakładało) -->
+          <div class="feature-shape_bottles">
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+          </div>
+        </div>
+
+        <!-- apla (mist) — wjeżdża z dołu; w środku OSTRA kopia (kontr-transform)
+             → overflow:hidden apli odkrywa ją naturalnie, krawędź zawsze = krawędź apli -->
+        <div class="home-we-know_bg" aria-hidden="true">
+          <div class="home-we-know_shape is-in-apla">
+            <!-- w apli shape jest BIAŁY (maska koloru; docelowy hex — dogra Tomek) -->
+            <img class="feature-shape_svg" src="assets/shape-white.svg" alt="" />
+            <!-- duplikaty (za główną, wysuwają się w lewo na scrub) — kolejność DOM: najdalsza pierwsza -->
+            <img class="feature-shape_bottle is-sharp is-dup" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle is-sharp is-dup" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle is-sharp is-dup" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle is-sharp" src="assets/bottle-v3.png" alt="" />
+          </div>
+        </div>
+
+        <!-- wp1 — ZAWSZE w miejscu docelowym (absolute w stage'u); na scrubie robimy
+             tylko TRANSFER POZYCJI (y z dołu ekranu → 0, okno w CONFIG.weKnow.seg) -->
+        <div class="home-we-know_wp1">
+          <!-- w1: relative, flex column space-between — para → diament → notka -->
+          <div class="home-we-know_w1">
+            <!-- SYSTEM #4 (highlight): tekst stoi i doswietla sie scrollem, litera po literze.
+                 `data-highlight` bez wartosci = jednostka domyslna z configu (WYRAZ, tak jak
+                 w track-record). Zakres scrolla podaje
+                 script.js przez highlightOnScroll (sekcja jest sticky, wiec procentowy `end`
+                 nie ma sensu — patrz _shared/README.md, „uzycie programowe").
+                 ⚠️ Splitter bierze czysty textContent, wiec ZAGNIEZDZONE SPANY zniknely
+                 (`_paragraph-main` / `_paragraph-muted`). Byly juz martwe: od 2026-07-26
+                 kolorowanie liter zastapilo span-swap, a `gsap.set(paraChars, color)` i tak
+                 nadpisywal ich kolor na starcie. -->
+            <p class="is-h-s home-we-know_paragraph" data-highlight>
+              that most biosimilar programs don&rsquo;t fail on science. They fail at the transitions.
+            </p>
+            <!-- diament — margin auto góra/dół (space-between centruje); wspólny dla obu stanów -->
+            <div class="home-we-know_diamond" aria-hidden="true">
+              <img src="assets/green-shape.svg" alt="" />
+            </div>
+            <p class="is-b-m home-we-know_note">The molecule isn&rsquo;t the risk.<br>The transitions are.</p>
+          </div>
+          <!-- w2: absolute, TE SAME wymiary co w1 — teksty Our goal wskakują 1:1 (diament zostaje z w1) -->
+          <div class="home-we-know_w2">
+            <p class="is-h-s home-we-know_goal-paragraph" data-reveal="our-goal">is to keep every program seemlessly moving as one system, from concept to commercial supply.</p>
+            <p class="is-b-m home-we-know_goal-note" data-reveal="our-goal">Full biosimilar lifecycle.<br>One global development strategy.</p>
+          </div>
+        </div>
+
+        <!-- tytuły — jeden wrapper, CENTROWANY na linii 50vh (translateY -50%), podmiana w miejscu;
+             "We know" POJAWIA SIĘ (globalny reveal) duże na starcie okna transferu + shrink na scrubie -->
+        <div class="home-we-know_title-wrap">
+          <h2 class="home-we-know_title" data-reveal="we-know">We know</h2>
+          <h2 class="home-we-know_goal-title" data-reveal="our-goal">Our goal</h2>
+        </div>
+
+        <!-- NACHODZENIE: solidny overlay rosnący gdy blok key-pillars wjeżdża na We know
+             (opacity sterowany w key-pillars.js → initEntryOverlap) -->
+        <div class="home-we-know_overlay" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         KEY PILLARS (merge z _code/key-pillars/ — 3 sekcje po kolei)
+         Doklejone na SAMYM DOLE strony, po is-home-we-know.
+         Choreografia: home-full/key-pillars.js (initIntro/initKeyPillars/initConcept).
+         ============================================================ -->
+
+    <!-- ============ 1) INTRO — „Swiss engineered, supplied globally" (node 4473:5304)
+         Nawias rośnie POZIOMO od brzegów do środka, RÓWNO z reveal'em tekstu (wariant C). ============ -->
+    <!-- ⬇⬇ CIĘCIE ZAKRESU (home-part1, 2026-07-26) ⬇⬇
+         Tu w home-mobile/home-full zaczyna się `.home-key-pillars-block` (intro + key-pillars
+         nachodzące na We-know przez margin-top). Ten prototyp kończy się DOKŁADNIE w tym
+         miejscu — na wjeździe apli. Wszystko od key-pillars w dół USUNIĘTE Z DOM
+         (nie ukryte): sekcje wf-home Maćka, insights, CTA, footer-bottle-reveal, site footer.
+         Kanon z całą stroną: ../home-full/ -->
+  </main>
+
+
+  <!-- ============ FEATURE SHAPE (site-level overlay — TYLKO do handoffu) ============
+       Pojawia się na końcu wideo, przeżywa najazd białej sekcji; na starcie pinu
+       We know jest podmieniany na kopie żyjące w sekcji (patrz home-we-know_shape). -->
+  <div class="feature-shape_component" aria-hidden="true">
+    <img class="feature-shape_svg" src="assets/shape.svg" alt="" />
+    <img class="feature-shape_bottle is-sharp" src="assets/bottle-v3.png" alt="" />
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <!-- SplitText (od GSAP 3.13 darmowy) — dzieli teksty na linie pod globalny line-reveal;
+       jsdelivr = lustro npm (cdnjs nie hostuje wszystkich pluginów) -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <!-- SMOOTH SCROLL — LENIS. Kanon projektu: _code/_smooth-lenis/ (COMPARISON.md → rekomendacja
+       Lenis, nie ScrollSmoother: nie transformuje kontenera, więc `position: fixed` handoffu
+       kształtu działa natywnie). Musi być PO gsap + ScrollTrigger, a PRZED skryptami strony. -->
+  <script src="vendor/lenis.min.js"></script>
+  <script src="smooth-lenis.js"></script>
+
+  <!-- warstwa globalna (_shared): config + system #1 (reveal) + nav (generator kształtu, maska #2) -->
+  <script src="../_shared/gsap-config.js"></script>
+  <script src="../_shared/reveal.js"></script>
+  <script src="../_shared/highlight.js"></script>   <!-- system #4: scroll highlight -->
+  <script src="../_shared/swap.js"></script>
+  <script src="../_shared/nav/nav-shape.js"></script>
+  <script src="../_shared/nav/nav-menu.js"></script>
+  <script src="../_shared/nav/nav-mask.js"></script>
+  <!-- silnik hero: line reveal + water na canvasie WebGL (start po loaderze z script.js) -->
+  <!-- Unicorn Studio (oficjalny snippet, v2.1.9) -->
+  <script type="text/javascript">!function(){var u=window.UnicornStudio;if(u&&u.init){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){u.init()})}else{u.init()}}else{window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.9/dist/unicornStudio.umd.js",i.onload=function(){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){UnicornStudio.init()})}else{UnicornStudio.init()}},(document.head||document.body).appendChild(i)}}();</script>
+  <!-- Lottie loadera (01D) — lib (CDN) + dane inline window.LOADER_01D, PRZED script.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <script src="loader-01d.js"></script>
+  <script src="script.js?v=p4"></script>
+</body>
+</html>

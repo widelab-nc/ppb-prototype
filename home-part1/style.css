@@ -1,0 +1,1312 @@
+/* ============================================================
+   Polpharma Biologics — home prototype (TYLKO custom strony)
+   Warstwa globalna: ../_shared/styleguide.css + ../_shared/nav/nav.css
+   (typografia is-*, kolory, .section/.container, fonty, nav, maska nav,
+   Get in touch, FOUC guard, .rv-*) — NICZEGO stamtąd nie redefiniować.
+   ============================================================ */
+
+/* ============================================================
+   LOADER (site-level overlay)
+   ============================================================ */
+.loader_component {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--lab-white);
+}
+
+.loader_caption {
+  position: absolute;
+  z-index: 1;
+  white-space: nowrap;
+  font-weight: 500;   /* Medium — do czasu wgrania Season Sans Bold 700 */
+}
+.loader_caption.is-left  { left: 1.875rem; top: 1.5rem; }
+.loader_caption.is-right { right: 1.875rem; bottom: 1.5rem; text-align: right; }
+
+.loader_marks {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.loader_mark {
+  position: absolute;
+  width: 1.875rem;
+  height: 1.875rem;
+  will-change: transform;
+}
+.loader_mark svg { display: block; width: 100%; height: 100%; }
+.loader_mark.is-square { transform: translateX(-1.0625rem); }
+.loader_mark.is-circle { transform: translateX(1.0625rem); z-index: 2; }
+
+/* (NAV + NAV MASK + GET IN TOUCH → ../_shared/nav/nav.css) */
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.section.is-home-hero {
+  min-height: 100vh;
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  align-items: flex-start;   /* tekst w górnej części ekranu (jak w Figmie), nie na środku */
+  overflow: clip;
+}
+
+.home-hero_background {
+  position: absolute;
+  inset: -15% 0; /* zapas na parallax, żeby nie odsłonić krawędzi */
+  z-index: -1;
+  background: linear-gradient(180deg, #013b3a 0%, #0c5e5c 35%, #7fb5b3 75%, #cfe3e2 100%);
+  overflow: hidden;
+  will-change: transform;
+}
+/* Unicorn Studio embed — nad gradientem/kształtami (fallback zostaje pod spodem).
+   WAŻNE: tło ma inset:-15% (130vh), więc inset:0 dawało Unicornowi zły aspect (za duży/zoom).
+   Usztywniamy do 100vh (= viewport, jak na stronie testowej), wyśrodkowany w tle → parallac tła zostaje. */
+.home-hero_unicorn {
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  height: 100vh;             /* viewport, NIE 130vh overscanu tła — poprawny aspect Unicorna */
+  transform: translateY(-50%);
+  z-index: 2;
+}
+.home-hero_unicorn canvas { width: 100%; height: 100%; display: block; }
+
+/* overlay na Unicorn — narasta na scrollu (GSAP steruje opacity) */
+.home-hero_overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;                 /* nad Unicornem (2), pod treścią hero */
+  background: #000;           /* PRZEBUDOWA paczka 3: overlay CZARNY (było deep-green) */
+  opacity: 0;
+  pointer-events: none;
+}
+
+.home-hero_bg-shape {
+  position: absolute;
+  left: 50%;
+  border-radius: 50%;
+  z-index: 1;
+}
+.home-hero_bg-shape.is-top {
+  width: 70vw; height: 70vw;
+  top: 8%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 50% 30%, rgba(198, 236, 235, 0.25), rgba(1, 59, 58, 0.15));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.home-hero_bg-shape.is-bottom {
+  width: 80vw; height: 80vw;
+  top: 55%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.75), rgba(198, 236, 235, 0.35));
+  filter: blur(2px);
+}
+
+.home-hero_component {
+  text-align: center;
+  padding-top: 15.5vh;    /* decyzja Tomka 2026-07-26 */
+  position: relative;     /* kontekst pozycjonowania dla canvasu hero (i containing-block przy parallax transform) */
+  /* 2026-07-26 (prototyp mobile): komponent = RAMA LAYOUTU hero.
+     min-height 100vh + box-sizing:border-box (reset globalny) -> jego dolna krawedz
+     lezy dokladnie na dole ekranu, a prawa na prawej krawedzi kontenera.
+     Dzieki temu "Get in touch" moze byc JEDNYM elementem: absolute (desktop,
+     prawy dolny rog) <-> static (mobile, flow pod podtytulem) - bez duplikatu w DOM. */
+  min-height: 100vh;
+}
+/* container hero na pelna szerokosc - inaczej flex-item kurczy sie do tresci
+   i `right: 0` na CTA nie trafialoby w krawedz kontenera. Wizualnie no-op:
+   heading i tak ma max-width 50rem + auto marginesy. */
+.section.is-home-hero > .container { width: 100%; }
+.home-hero_heading {
+  max-width: 50rem;       /* Figma: 800px */
+  margin-left: auto;
+  margin-right: auto;
+}
+.home-hero_subtitle {
+  margin-top: 1.5rem;
+  color: rgba(230, 239, 239, 0.9);   /* Figma: Mist #E6EFEF, opacity 90% */
+}
+
+.home-hero_arrow {
+  position: absolute;
+  left: 50%;
+  bottom: 2rem;           /* Figma: 32px */
+  transform: translateX(-50%);
+  width: 3.75rem; height: 3.75rem;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-hero_arrow svg { width: 1rem; height: 1rem; }
+
+/* ============================================================
+   PINNED FLOW: How it works → Section-1 → Section-End
+   ============================================================ */
+.section.is-home-how-it-works {
+  padding: 0;
+  background: var(--deep-green);
+  z-index: 1;
+}
+.home-how-it-works_pin {
+  position: relative;
+  height: 100vh;
+  overflow: clip;
+}
+
+/* header — tekst wejściowy */
+.home-how-it-works_header {
+  position: relative;
+  z-index: 1;
+  padding-top: 12.5rem;   /* Figma: headline top y=200 / 800 */
+  text-align: center;
+}
+.home-how-it-works_subtitle {
+  margin-top: 1.5rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* nawias [ po lewej stronie bloku tekstu (Figma: x=32, y=200, 20×245, otwarty w prawo) */
+/* wrapper tekstu — punkt odniesienia dla nawiasów */
+.home-how-it-works_copy { position: relative; }
+
+.home-how-it-works_bracket {
+  position: absolute;
+  left: 0;                  /* krawędź wrappera = krawędź kontenera (header ma padding: gutter) */
+  top: 0;                   /* 2026-07-27: było top: 12.5rem — kopia paddingu nagłówka */
+  bottom: 0;                /* wysokość z TREŚCI — było height: 15.3125rem na sztywno */
+  width: 1.25rem;           /* 20px "feet" */
+  border: 1px solid var(--light-stroke);
+  border-right: none;       /* [ otwarty z prawej */
+  border-top-left-radius: 0.625rem;    /* 10px — zaokrąglone zgięcia (Figma 4473:5415) */
+  border-bottom-left-radius: 0.625rem;
+  transform-origin: 50% 50%; /* grow na reveal = scaleY z środka */
+  pointer-events: none;
+}
+
+/* nawias ] po PRAWEJ — lustrzane odbicie lewego (otwarty w lewo) */
+.home-how-it-works_bracket.is-right {
+  left: auto;
+  right: 0;
+  border-left: none;
+  border-right: 1px solid var(--light-stroke);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.625rem;
+  border-bottom-right-radius: 0.625rem;
+}
+
+/* maska z wideo */
+.home-how-it-works_media-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.home-how-it-works_media {
+  position: absolute;
+  inset: 0;
+  /* MASKA = zaokrąglony kwadrat obrócony 45° (diament); rotacja ZAPIECZONA w SVG → statyczna.
+     Rozmiar (mask-size) i pozycja (peek z dołu) animowane przez GSAP.
+     Wideo pod spodem zostaje pełnoekranowe — maska tylko odsłania jego fragment. */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 851 810'%3E%3Cpath d='M828.374 353.008L480.123 21.5357C449.956 -7.17857 401.044 -7.17857 370.877 21.5357L22.6258 353.008C-7.54195 381.722 -7.54191 428.277 22.6258 456.992L370.877 788.464C401.044 817.179 449.956 817.179 480.123 788.464L828.374 456.992C858.542 428.278 858.542 381.722 828.374 353.008Z' fill='%23fff'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 851 810'%3E%3Cpath d='M828.374 353.008L480.123 21.5357C449.956 -7.17857 401.044 -7.17857 370.877 21.5357L22.6258 353.008C-7.54195 381.722 -7.54191 428.277 22.6258 456.992L370.877 788.464C401.044 817.179 449.956 817.179 480.123 788.464L828.374 456.992C858.542 428.278 858.542 381.722 828.374 353.008Z' fill='%23fff'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  will-change: -webkit-mask-size, mask-size, -webkit-mask-position, mask-position;
+}
+.home-how-it-works_video {
+  /* wideo = zwykły fullscreen (object-fit cover); maska nad nim wycina diament.
+     Na końcu maska > viewport → pełny, czysty cover = 1:1 z SHAPE_DIMS (handoff shape'a). */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* stats overlays (Section-1 / Section-End) */
+.home-how-it-works_stats {
+  position: absolute;
+  right: var(--container-gutter);   /* wyrównanie do kontenera 86rem (było 2rem) */
+  top: 33vh;        /* Figma: y=265 / 800 */
+  z-index: 3;
+  width: 18.75rem;  /* 300px */
+}
+.home-how-it-works_stat {
+  padding: 0 0 1.5rem;
+}
+.home-how-it-works_stat-line {
+  height: 1px;
+  background: var(--light-stroke);
+  transform-origin: left center;
+  margin-bottom: 1rem;
+}
+.home-how-it-works_stat-label {
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+/* ciemny overlay podczas najazdu następnej sekcji */
+.home-how-it-works_dark-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #001a1a;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* WHAT WE DO — dół-lewo */
+.home-how-it-works_what-we-do {
+  position: absolute;
+  left: var(--container-gutter);    /* wyrównanie do kontenera 86rem (było 2rem) */
+  bottom: 2rem;     /* Figma: 32px */
+  z-index: 3;
+  text-align: left;
+}
+.home-how-it-works_label {
+  /* NIE flex — kropka musi być inline w linii, żeby SplitText złapał ją do maski
+     line-reveal (wjazd od dołu razem z tekstem, jak reszta). */
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+  line-height: 1.5;   /* zapas w masce, żeby 8px kropka nie była przycięta (is-caption ma lh 1.0) */
+}
+.home-how-it-works_label-dot {
+  display: inline-block;
+  width: 0.5rem; height: 0.5rem;
+  margin-right: 0.5rem;          /* dawny gap flexa */
+  border-radius: 50%;
+  background: var(--red);
+  vertical-align: middle;        /* wyśrodkowanie na linii (dawne align-items: center) */
+}
+
+/* ============================================================
+   STUB — dalsza część strony
+   ============================================================ */
+/* ============================================================
+   WE KNOW (The problem)
+   ============================================================ */
+/* REFAKTOR (paczka 2): sekcja WYSOKA (wysokość ustawia JS = (1+pinViewports)×100vh),
+   sticky stage z tłami zamiast GSAP-pinu, teksty w naturalnym flow ze sticky. */
+.section.is-home-we-know {
+  padding: 0;
+  background: var(--lab-white);
+  /* sticky handoff: nachodzi na przypiętą sekcję wideo pod koniec pinu.
+     WARTOŚĆ = CONFIG.howItWorks.overlapViewports × 100vh (sync ze script.js!)
+     -100vh = wideo pod spodem STOI aż biel zakryje cały ekran */
+  position: relative;
+  z-index: 10;
+  margin-top: -100vh;
+  /* UWAGA: żadnego overflow na sekcji — ubiłby sticky w dzieciach */
+}
+
+/* stage — tła (apla + shape'y); sticky = odpowiednik dawnego pinu */
+.home-we-know_stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: clip;
+  z-index: 0;
+}
+
+/* apla (mist) — wjeżdża z dołu; pozycję startową (yPercent 100) ustawia GSAP.
+   overflow:hidden = naturalne odkrywanie ostrej kopii shape'a w środku */
+.home-we-know_bg {
+  position: absolute;
+  inset: 0;
+  background: var(--mist);
+  overflow: hidden;
+}
+
+/* kopie shape'a żyjące w stage'u (bazowa blur + ostra w apli)
+   centrowanie przez GSAP (xPercent/yPercent -50) */
+.home-we-know_shape {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* wymiary + transform ustawia GSAP (applyShapeDims) — 1:1 z ostatnią klatką wideo */
+  will-change: transform;
+}
+
+/* ---------- wp1 — ZAWSZE w miejscu docelowym (absolute w stage'u) ----------
+   Ruch = wyłącznie TRANSFER POZYCJI na scrubie (GSAP, y z dołu → 0, z kisielem).
+   top/height ustawia JS z CONFIG.weKnow.layout. */
+.home-we-know_wp1 {
+  position: absolute;
+  /* 2026-07-27 FIX: było `right: 3rem` — czyli 48px od krawędzi EKRANU, nie od kontenera.
+     Na 1440 te dwie rzeczy prawie się pokrywają (48 vs 32), więc błąd był niewidoczny;
+     na 2300 kolumna tekstu wisiała 150px POZA kontenerem, a między nią a kształtem
+     otwierała się 758px dziura. Kanon (class-structure-and-naming.md): elementy
+     site-level i sekcje full-bleed przypina się do --container-gutter, nie do viewportu.
+     ⚠️ Na 1440 przesuwa tekst o 16px w prawo — dosuwa go DOKŁADNIE do krawędzi kontenera. */
+  right: var(--container-gutter);
+  width: 27.5rem;
+  z-index: 1;
+  will-change: transform;
+}
+
+/* w1 — relative, flex column space-between: para → diament → notka (ZERO absolute) */
+.home-we-know_w1 {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.home-we-know_paragraph {
+  width: 100%;
+  color: var(--deep-green);
+}
+.home-we-know_paragraph-muted {
+  color: rgba(0, 84, 83, 0.18);
+}
+.home-we-know_note {
+  width: 100%;
+  color: var(--deep-green);
+}
+
+/* diament — element flow: margin auto góra/dół = idealnie MIĘDZY para a notką
+   (space-between + auto margins → koniec problemu z pozycją) */
+.home-we-know_diamond {
+  width: 3.75rem;
+  height: 3.75rem;
+  margin: auto 0;
+}
+.home-we-know_diamond img { display: block; width: 100%; height: 100%; }
+
+/* w2 — absolute, TE SAME wymiary co w1 (inset 0), ta sama siatka space-between:
+   teksty Our goal wskakują dokładnie w miejsca para/notki; diament zostaje z w1 */
+.home-we-know_w2 {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+}
+.home-we-know_goal-paragraph {
+  width: 100%;           /* zawsze 100% parenta (decyzja Tomka 2026-07-19) */
+  color: var(--deep-green);
+}
+.home-we-know_goal-note {
+  width: 100%;
+  color: var(--deep-green);
+}
+
+/* ---------- tytuły — JEDEN wrapper, w STAGE'U (nie scrollują), podmiana w miejscu ---------- */
+/* absolute w sticky stage'u, CENTROWANY na linii titleTop (translateY -50%);
+   top ustawia JS; linia 2 paragrafu siada na środku tytułu */
+.home-we-know_title-wrap {
+  position: absolute;
+  /* left liczone w JS = środek PRZERWY między shapem a tekstem (równe odstępy, responsywnie).
+     translate(-50%,-50%) → środek wrapa siada na (left, top). */
+  transform: translate(-50%, -50%);
+  width: fit-content;
+  text-align: center; /* oba tytuły (We know / Our goal) centrują się na midX, nie tylko wrap */
+  z-index: 1;         /* nad aplą (w obrębie stage'a) */
+}
+.home-we-know_title {
+  font-family: var(--heading-family);
+  font-weight: 400;
+  font-size: 2.5rem;  /* Heading Small — bez shrinku, tytuł się POJAWIA (reveal) */
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  font-feature-settings: "ss01" 1;
+  color: var(--deep-green);
+  white-space: nowrap;
+}
+.home-we-know_goal-title {
+  position: absolute;
+  top: 0;
+  left: 0;            /* dokładnie w miejscu "We know" */
+  font-family: var(--heading-family);
+  font-weight: 400;
+  font-size: 2.5rem;  /* Figma: Heading Small 40px */
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  font-feature-settings: "ss01" 1;
+  color: var(--deep-green);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   FEATURE SHAPE — site-level overlay (shape.svg + butelka)
+   ============================================================ */
+.feature-shape_component {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  /* transform + wymiary ustawia GSAP (applyShapeDims) — 1:1 z ostatnią klatką wideo */
+  z-index: 20;      /* nad sekcjami (10), pod nav (50) */
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+.feature-shape_svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1; /* kolor kształtu = Mist #E6EFEF (fill w shape.svg) */
+}
+/* butelka (bottle.png, 519×437, transparent) — centrowana przez GSAP
+   (xPercent/yPercent -50; CSS transform usunięty, żeby rotate z GSAP nie nadpisywał);
+   blur = wersja bazowa, ukryta do sekwencji wejścia */
+/* wrapper grupy butelek (weShape) — fill shape'a; opacity fade lecił TU (grupowo, nie per-butelka) */
+.feature-shape_bottles { position: absolute; inset: 0; }
+.feature-shape_bottle {
+  position: absolute;
+  left: 48.5%;   /* dostrojone przez Tomka w inspect (butelka końca wideo) */
+  top: 49.5%;
+  width: 70%; /* PNG ma przezroczyste marginesy — kalibrowane do designu; GSAP nadpisuje width */
+  height: auto;
+  filter: blur(14px);
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+/* wersja ostra (w apli) — widoczna od razu, odkrywa ją krawędź apli */
+.feature-shape_bottle.is-sharp {
+  filter: none;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* (FOUC guard [data-reveal] + .rv-line/.rv-line-in + reduced-motion
+   → ../_shared/styleguide.css) */
+
+/* ============================================================
+   ████ KEY PILLARS (merge z _code/key-pillars/) ████
+   3 sekcje doklejone na dole strony: intro + key-pillars + concept.
+   Warstwa globalna → ../_shared/styleguide.css. Tu TYLKO custom sekcji.
+   ⚠️ POMINIĘTE przy mergu (świadomie): override .section{padding:5rem 2rem}
+      i .container{max-width:86rem} — ODSTĘPSTWA prototypu; home-full używa
+      KANONU (48px padding / 1344 container z styleguide.css). Także .proto-spacer
+      / .proto-label (elementy prototypu) NIE przeniesione.
+   ============================================================ */
+
+:root {
+  --line-stroke: #D9D9D9;   /* linie detail (Figma #d9d9d9) — lokalny token sekcji */
+}
+
+/* ============================================================
+   1) INTRO — „Swiss engineered, supplied globally" (node 4473:5304)
+   ============================================================ */
+/* BLOK key-pillars: intro + key-pillars POŁĄCZONE, NACHODZĄ na We-know (2026-07-24).
+   z-index:20 (nad We-know z:10) na CAŁYM bloku → nie ma dziury (wcześniej key-pillars
+   miał z:0, więc We-know z:10 malowało się nad nim). margin-top:-100vh = overlap 1 ekran. */
+.home-key-pillars-block { position: relative; z-index: 20; margin-top: -85vh; }   /* -85: 5vh HOLD po pełnej apli, potem wjazd bloku */
+
+.section.is-home-key-pillars-intro {
+  /* ---- NACHODZENIE (2026-07-24): cały blok key-pillars wjeżdża NA We know ----
+     mechanizm 1:1 z how-it-works → we-know: sekcja pod spodem (We know, z:10) zostaje,
+     a intro (z:20, pełny ekran, wciągnięte -100vh) nasuwa się na nią. W tym czasie na
+     We know rośnie SOLIDNY overlay (.home-we-know_overlay — key-pillars.js initEntryOverlap). */
+  margin-top: 0;             /* overlap WYŁĄCZONY (2026-07-24): intro nie jest pełnoekranowe (min-height zdjęty),
+                                wiec -100vh odslanial We-know pod spodem = „dziura". Teraz intro = normalna sekcja po We-know. */
+  z-index: 20;               /* nad We know (z:10) — intro zakrywa ją wjeżdżając */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* content wyśrodkowany pionowo na pełnym ekranie */
+  padding-top: 10rem;        /* 160 — odstęp z Figmy */
+  padding-bottom: 0;         /* usunięty (decyzja Tomka) — nadpisuje kanon .section (5rem) */
+  background: var(--lab-white);
+}
+/* w kolumnowym flexie container musi trzymać pełną szerokość (nawiasy = width:100%);
+   max-width: none (2026-07-24) — jak key-pillars: nawiasy rozchodzą się na maxa (heading
+   copy zostaje 57rem, wyśrodkowany). Padding poziomy = kanon .section (48px). */
+.section.is-home-key-pillars-intro .container { width: 100%; }  /* max-width z .container = 86rem */
+
+/* SOLIDNY overlay handoffu na We know — leży W jej sticky stage'u (pełny viewport),
+   nad całą treścią We know, pod wjeżdżającym intro (z:20). Rośnie autoAlpha 0→max
+   na scrubie (key-pillars.js initEntryOverlap), gdy intro nasuwa się na We know. */
+.home-we-know_overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;                /* nad shape/apla/wp1/tytułami (z:0–1) We know */
+  background: #001a1a;       /* solid ciemny (knob koloru — do podmiany, „zobaczymy") */
+  opacity: 0;
+  visibility: hidden;        /* FOUC guard — autoAlpha z GSAP steruje */
+  pointer-events: none;
+}
+.home-key-pillars-intro_component {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;                 /* 80 */
+}
+.home-key-pillars-intro_line { display: flex; width: 100%; }
+.home-key-pillars-intro_line-seg {
+  height: 1.25rem;           /* 20 */
+  border: 1px solid var(--line-stroke);
+  border-bottom: none;
+  border-top-left-radius: 0.625rem;   /* 10 */
+  border-top-right-radius: 0.625rem;
+  /* INTERAKCJA (key-pillars.js initIntro): segmenty rosną poziomo od BRZEGÓW do środka
+     (is-a origin left, is-b origin right). scaleX(0) tu = FOUC guard. */
+  transform: scaleX(0);
+  will-change: transform;
+}
+/* MERGE: w kanonie (container 1344) fixed 689/688px (razem 1377) jest za szerokie →
+   flex:1 (po połowie), origin is-a left / is-b right (oba rosną do środka). */
+.home-key-pillars-intro_line-seg.is-a { flex: 1; transform-origin: left center; }
+.home-key-pillars-intro_line-seg.is-b { flex: 1; transform-origin: right center; }
+.home-key-pillars-intro_line.is-bottom .home-key-pillars-intro_line-seg {
+  border-top: none;
+  border-bottom: 1px solid var(--line-stroke);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 0.625rem;
+  border-bottom-right-radius: 0.625rem;
+}
+.home-key-pillars-intro_copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;               /* 24 */
+  width: 57rem;              /* 912 */
+  text-align: center;
+}
+.home-key-pillars-intro_heading { width: 100%; }
+.home-key-pillars-intro_subheading {
+  width: 100%;
+  /* wyciszenie w alfie koloru (NIE opacity) — inaczej autoAlpha:1 z line-reveala
+     rozjaśnia do 100%. Konwencja jak w kanonie `home`. Black #161517 @ 50% */
+  color: rgba(22, 21, 23, 0.5);
+}
+
+/* ============================================================
+   2) KEY PILLARS — sticky (pin) + scroll (node 4473:5315)
+   ============================================================ */
+.section.is-home-key-pillars { padding: 0; background: var(--lab-white); }
+
+.home-key-pillars_pin {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  /* PADDING (2026-07-26, decyzja Tomka — wariant A): RÓWNY odstęp 3rem po OBU stronach,
+     liczony od WIDOCZNEJ krawędzi pigułki nava. Nav = padding-top 1.5rem + pigułka 2.625rem
+     = 4.125rem do widocznej krawędzi; dolne 1.5rem paddingu nava jest NIEWIDZIALNE, więc
+     go NIE wliczamy (wcześniej wliczone → góra wyglądała na 4.5rem przy dole 3rem).
+     Góra = 4.125 + 3 = 7.125rem. Dół = 3rem.
+     Suma paddingów żyje w zmiennych — --kp-size/--kp-h liczą się z nich (koniec z 3 kopiami liczby). */
+  --kp-pad-t: 7.125rem;
+  --kp-pad-b: 3rem;
+  padding: var(--kp-pad-t) var(--container-gutter) var(--kp-pad-b);
+  overflow: clip;
+  /* RESPONSYWNOŚĆ WYSOKOŚCI: kwadrat = min(614px, 100vh − padding góra+dół).
+     Poniżej ~800px wysokości blok maleje proporcjonalnie (komponent + stage + gap lewej). */
+  --kp-size: min(38.375rem, calc(100vh - var(--kp-pad-t) - var(--kp-pad-b)));   /* KWADRAT stage (614) */
+  --kp-h:    min(39.625rem, calc(100vh - var(--kp-pad-t) - var(--kp-pad-b)));   /* wys. komponentu/lewej (634 = treść + gap 166 z Figmy) */
+}
+.home-key-pillars_pin .container { width: 100%; }
+/* PEŁNA SZEROKOŚĆ komponentu key-pillars (2026-07-24): zdejmujemy max-width containera,
+   żeby lewa kolumna i prawa grupa rozeszły się na maxa. Padding poziomy = pin 0 2rem (32px)
+   = tożsamy z .nav_component (padding 1.5rem 2rem) → krawędzie treści zgrane z navbarem. */
+/* .section.is-home-key-pillars .container: max-width = kanon .container (86rem) */
+
+.home-key-pillars_component {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--kp-h);       /* mieści lewą kolumnę (634 z gapem 166); stage-kwadrat = --kp-size, centrowany */
+}
+
+/* ---------- LEWA KOLUMNA (332) ---------- */
+.home-key-pillars_left {
+  width: 20.75rem;           /* 332 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  /* było sztywne gap 166 — teraz odstęp kurczy się z wysokością */
+  gap: 1.5rem;               /* minimalny odstęp, gdy blok bardzo niski */
+  height: 100%;              /* = wysokość komponentu (var --kp-h) */
+  max-height: 39.625rem;     /* 634 — pełny layout z Figmy (odstęp 166); niżej space-between kurczy gap */
+}
+.home-key-pillars_top { display: flex; flex-direction: column; gap: 1.5rem; }   /* 24 */
+.home-key-pillars_intro { display: flex; flex-direction: column; gap: 1.25rem; } /* 20 */
+
+.home-key-pillars_label { display: flex; align-items: center; gap: 0.75rem; }   /* 12 */
+.home-key-pillars_label-dot {
+  width: 0.5625rem; height: 0.5625rem;   /* 9 */
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+  opacity: 0;                /* WEJŚCIE: fade-in w playEntry (FOUC guard) */
+}
+.home-key-pillars_label-text { text-transform: uppercase; }
+
+.home-key-pillars_copy {
+  position: relative;
+  width: 22.5rem;            /* 360 */
+  height: 12.5rem;           /* 200 (Figma copy 198 + slack) */
+}
+/* SWAP-IN-PLACE (system #3): slot stackuje 4 stany w tej samej pozycji.
+   Wjazd/wyjazd steruje swap.js (revealText/hideText) — TU tylko stackowanie.
+   Zero CSS-fade/transition (kłóciłby się z GSAP). */
+.home-key-pillars_copy-item {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;                 /* 16 */
+  pointer-events: none;
+}
+/* FOUC guard dla stanów swapa (nie mają data-reveal): heading+paragraf startowo
+   ukryte; swap.js odsłania aktywny przez autoAlpha:1. */
+.home-key-pillars_copy-item .home-key-pillars_heading,
+.home-key-pillars_copy-item .home-key-pillars_paragraph {
+  visibility: hidden;
+}
+.home-key-pillars_paragraph {
+  width: 21.25rem;           /* 340 — Figma 4473:5325 */
+  /* wyciszenie w alfie koloru (NIE opacity) — patrz uwaga przy intro_subheading. Black @ 50% */
+  color: rgba(22, 21, 23, 0.5);
+}
+
+.home-key-pillars_cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6875rem 1.375rem;   /* 11 / 22 */
+  border-radius: 50px;
+  background: var(--red);
+  transition: transform 0.25s ease, background 0.25s ease;
+  opacity: 0;                /* WEJŚCIE: fade-in w playEntry (FOUC guard) */
+}
+.home-key-pillars_cta:hover { transform: translateY(-1px); background: #ef4d4d; }
+
+/* ---------- 4 KROKI ---------- */
+.home-key-pillars_steps { display: flex; flex-direction: column; gap: 1.5rem; width: 20.75rem; } /* 24 / 332 */
+.home-key-pillars_step {
+  position: relative;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;               /* 8 */
+  /* reset <button> (z prototypu, przeniesiony z globalnego `button {}` do scope kroku) */
+  font: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+.home-key-pillars_step-line {
+  height: 1px; width: 100%;
+  background: var(--deep-green);
+  opacity: 0.15;
+  transition: opacity 0.4s ease;
+  /* WEJŚCIE (initKeyPillars playEntry): linia rośnie scaleX 0→1 od lewej (jak
+     home-how-it-works_stat-line). scaleX(0) = FOUC guard. opacity = osobna oś (stan aktywny). */
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+.home-key-pillars_step.is-active .home-key-pillars_step-line { opacity: 0.9; }
+.home-key-pillars_step-row { display: flex; align-items: center; gap: 0; }
+.home-key-pillars_step-arrow {
+  display: inline-flex;
+  align-items: center;
+  width: 0;
+  overflow: hidden;
+  color: var(--deep-green);
+  opacity: 0;
+  transition: width 0.4s ease, margin-right 0.4s ease, opacity 0.4s ease;
+}
+.home-key-pillars_step-arrow svg { width: 0.75rem; height: 0.75rem; flex-shrink: 0; }
+.home-key-pillars_step.is-active .home-key-pillars_step-arrow {
+  width: 0.75rem;
+  margin-right: 0.4375rem;   /* 7 */
+  opacity: 1;
+}
+.home-key-pillars_step-label {
+  text-transform: uppercase;
+  /* wyciszenie w alfie koloru (NIE opacity) — inaczej autoAlpha:1 z line-reveala
+     rozjaśnia do 100% (były czarne zamiast 30%). Figma 4473:5333: Black #161517 @ 30% */
+  color: rgba(22, 21, 23, 0.3);
+  transition: color 0.4s ease;
+}
+.home-key-pillars_step.is-active .home-key-pillars_step-label { color: var(--deep-green); }  /* Deep Green, opacity 1 */
+
+/* ---------- PRAWA GRUPA (ring + pager, gap 32) ---------- */
+.home-key-pillars_right { display: flex; align-items: center; gap: 2rem; height: 100%; }
+
+.home-key-pillars_stage {
+  /* WYŚRODKOWANY w sekcji (2026-07-24): po zdjęciu max-width space-between dopychał
+     ring do prawej. absolute + left/top 50% + ujemne marginesy (POŁOWA 614px) centrują
+     go w komponencie BEZ transform → GSAP rotate/scale z wejścia dalej działa (osobny kanał).
+     Pager zostaje w flow (prawa krawędź). */
+  position: absolute;
+  left: 50%; top: 50%;
+  margin-left: calc(var(--kp-size) / -2);   /* połowa aktualnego kwadratu (centrowanie) */
+  margin-top: calc(var(--kp-size) / -2);
+  width: var(--kp-size); height: var(--kp-size);   /* kwadrat 1:1, skaluje się z wysokością */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;                /* WEJŚCIE: reveal (rotate/scale/opacity) w playEntry (FOUC guard) */
+  will-change: transform;
+}
+.home-key-pillars_ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.home-key-pillars_ring-track {
+  fill: none; stroke: var(--deep-green); stroke-opacity: 0.15; stroke-width: 1.5;
+}
+.home-key-pillars_ring-progress {
+  fill: none; stroke: var(--vibrant-green); stroke-width: 2; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 307px 307px;
+}
+.home-key-pillars_shape {
+  position: relative;
+  width: 68.307%; height: 68.307%;       /* 419.402/614 — skaluje się ze stage (var --kp-size) */
+  border-radius: 12.467%;                /* 52.28/419.4 — radius proporcjonalny do kształtu */
+  overflow: hidden;
+  background: var(--mist);
+  transform: rotate(45deg);
+  will-change: transform;
+}
+.home-key-pillars_video {
+  width: 160%; height: 160%;
+  margin: -30% 0 0 -30%;
+  object-fit: cover;
+  transform: rotate(-45deg);
+  will-change: transform;
+}
+
+.home-key-pillars_pager {
+  position: relative;
+  width: 21.75rem; height: 21.75rem;     /* 348 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;                /* WEJŚCIE: reveal (rotate/scale/opacity) w playEntry, odrobinę później (FOUC guard) */
+  will-change: transform;
+}
+.home-key-pillars_diamond {
+  position: absolute;
+  width: 16.5625rem; height: 16.5625rem; /* 265 */
+  border: 1.5px solid var(--deep-green);
+  opacity: 0.1;
+  border-radius: 2.5rem;
+  transform: rotate(45deg);
+}
+.home-key-pillars_dots { position: relative; display: flex; align-items: center; gap: 1.25rem; } /* 20 */
+.home-key-pillars_dot {
+  width: 0.5rem; height: 0.5rem;         /* 8 */
+  border-radius: 50%;
+  background: var(--deep-green);
+  opacity: 0.2;
+  transition: opacity 0.4s ease, width 0.4s ease, height 0.4s ease;
+}
+.home-key-pillars_dot.is-active {
+  width: 0.5625rem; height: 0.5625rem;   /* 9 */
+  opacity: 1;
+}
+
+/* reveal guard [data-reveal] → ../_shared/styleguide.css */
+
+/* ============================================================
+   3) CONCEPT — „From concept to commercial supply" (node 4473:4517)
+   Gradient, dwa kształty zbiegające się na scroll (glass pominięty). BEZ sticky.
+   ============================================================ */
+.section.is-home-concept {
+  position: relative;
+  padding: 0;                /* pełny bleed — gradient na full screen, bez obrysu (bazowy .section ma padding!) */
+  height: 100vh;             /* BEZ sticky — sekcja = jeden ekran, kształty zbiegają się na scrollu */
+  background: #033030;       /* fallback (najciemniejszy stop) — bg-div i tak pokrywa viewport */
+}
+.home-concept_pin {
+  position: relative;        /* BEZ sticky (decyzja 2026-07-22) — treść scrolluje z sekcją */
+  height: 100vh;
+  overflow: clip;
+  display: flex; align-items: center; justify-content: center;   /* centrowanie copy bez transformu */
+  isolation: isolate;        /* własny stacking context → przeplot: kółko < heading < kwadrat < podtytuł */
+}
+/* tło gradientu — 120vh, osadzone w pinie; GSAP jedzie yPercent 0 → −16.667 (=−20vh) */
+.home-concept_bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 120vh;
+  z-index: 0;
+  background: linear-gradient(180deg, #033030 0%, #005453 30%, #548b94 100%);
+  will-change: transform;
+}
+.home-concept_shapes { position: absolute; inset: 0; }
+.home-concept_circle,
+.home-concept_square {
+  position: absolute;
+  top: 50%; left: 50%;
+  will-change: transform;
+}
+.home-concept_circle {
+  width: 29.875rem; height: 29.875rem;   /* 478 */
+  margin: -14.9375rem 0 0 -14.9375rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  transform: translateX(0);              /* REWERS: start wyśrodkowany (złączony znak) */
+  z-index: 1;                            /* NAJNIŻEJ (pod headingiem) */
+}
+.home-concept_square {
+  width: 31.25rem; height: 31.25rem;     /* 500 */
+  margin: -15.625rem 0 0 -15.625rem;
+  overflow: visible;
+  transform: translateX(0);              /* REWERS: start wyśrodkowany (złączony znak) */
+  z-index: 3;                            /* nad headingiem, pod podtytułem */
+}
+.home-concept_square-fill { fill: rgba(255, 255, 255, 0.05); }
+.home-concept_square-stroke { fill: none; stroke: rgba(255, 255, 255, 0.22); stroke-width: 1; }
+
+.home-concept_copy {
+  position: relative;        /* centrowane flexem pina (bez transformu → brak własnego stacking contextu) */
+  width: 50rem;              /* 800 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;               /* 24 */
+  text-align: center;
+}
+.home-concept_heading { width: 100%; position: relative; z-index: 2; }
+/* wyciszenie w alfie (NIE opacity) — line-reveal ustawia autoAlpha:1. Mist #E6EFEF @90% (1:1 z home) */
+.home-concept_subheading { width: 100%; color: rgba(230, 239, 239, 0.9); position: relative; z-index: 4; }
+
+/* ============================================================
+   4) CTA — „The right partner changes everything" (Figma 4473:4736)
+   Ciemny gradient + 2 okręgi tła (1:1), headline centrowany, biały pill button.
+   Butelka + navbar z Figmy POMINIĘTE. Pixel-perfect @1440×800 (rem/px z Figmy).
+   ⚠️ Gradient tła + krycie obrysu okręgów = „na oko" z renderu (pobranie assetów Figma
+      w sandboxie zablokowane) — knoby do dostrojenia. Reszta z tokenów 1:1.
+   ============================================================ */
+.section.is-home-cta {
+  position: relative;
+  padding: 0;                /* pełny bleed — gradient + okręgi na full screen */
+  min-height: 100vh;         /* Figma frame 800px ≈ 1 ekran */
+  overflow: clip;            /* okręgi wychodzą poza sekcję → przycięte do niej (jak Figma frame) */
+  background: #033030;       /* fallback (najciemniejszy stop) */
+}
+/* gradient tła — Figma „Gradients/Dark" 1:1: #033030 0% → #005453 30% → #548B94 100% (ten sam co concept) */
+.home-cta_bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(180deg, #033030 0%, #005453 30%, #548b94 100%);
+}
+/* DWA okręgi (Ellipse 657/658): 1059px, wyśrodkowane w poziomie (Figma center x≈720/1440),
+   pozycje pionowe 1:1 z Figmy (top -388 / 495). Obrys cienki, jasny (eyeballed). */
+.home-cta_circle {
+  position: absolute;
+  left: 50%;
+  margin-left: -33.09375rem;   /* -1059/2 px → środek na 50% (Figma center x=720.5) */
+  width: 66.1875rem;           /* 1059 */
+  height: 66.1875rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);  /* knob: krycie obrysu */
+  z-index: 1;
+  will-change: transform;
+  pointer-events: none;
+}
+.home-cta_circle.is-top    { top: -24.25rem; }   /* -388 */
+.home-cta_circle.is-bottom { top: 30.9375rem; }  /* 495 */
+
+/* content nad okręgami; container = kanon (max-width 1344), headline 800 centrowany */
+.section.is-home-cta .container { position: relative; z-index: 2; }
+/* ⚠️ REZERWA POD BUTELKĘ (2026-07-26): butelka rośnie z SZEROKOŚCIĄ ekranu (14 % szerokości
+   wideo, a wideo jest full-bleed), a sekcja ma wysokość spiętą ze 100vh. Na szerokim-i-niskim
+   ekranie (1920×900, 2560×1080) butelka dochodziła do tekstu. Rezerwa = wysokość butelki
+   (--bottle-h, ustawiane z realnego pomiaru w key-pillars.js) + odstęp (--cta-bottle-gap).
+   Sekcja rośnie ponad 100vh tylko tam, gdzie naprawdę trzeba. */
+.home-cta_component {
+  padding-top: 7.875rem;     /* 126 — Figma headline top (navbar+gap pominięte, ale nav fixed zajmuje górę) */
+  padding-bottom: calc(var(--bottle-h) + var(--cta-bottle-gap));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;              /* 28 — headline → button */
+  text-align: center;
+}
+.home-cta_copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;               /* 24 — heading → subtitle */
+}
+.home-cta_heading { max-width: 50rem; }   /* 800 — łamie na 2 linie jak Figma */
+.home-cta_subtitle {
+  max-width: 26.75rem;       /* 428 */
+  /* wyciszenie w alfie (NIE opacity) — line-reveal ustawia autoAlpha:1. Mist #E6EFEF @90% */
+  color: rgba(230, 239, 239, 0.9);
+}
+.home-cta_cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6875rem 1.375rem;   /* 11 / 22 (Figma) */
+  border-radius: 3.125rem;       /* 50px */
+  background: var(--lab-white);
+  transition: transform 0.25s ease, background 0.25s ease;
+  opacity: 0;                    /* FOUC guard — initCta odsłania (autoAlpha) */
+}
+.home-cta_cta:hover { transform: translateY(-1px); background: #f2f2f2; }
+
+
+/* ============================================================
+   FOOTER BOTTLE REVEAL — sekwencja butelki (PNG) + taśma (wideo), OSTATNIA sekcja
+   (z _code/footer-bottle-reveal/). Butelka absolutem NAD sekcją wyżej (CTA); dół = górna
+   krawędź wideo. Scrub = key-pillars.js initFooterBottleReveal. Namespace footer-bottle-reveal_*.
+   ⚠️ Sekcja wyżej (is-home-cta) ma overflow:clip, ale butelka jest dzieckiem TEJ sekcji
+      (sibling), więc nie jest przez nią przycinana — maluje się nad nią (z-index).
+   ============================================================ */
+.section.is-footer-bottle-reveal { padding: 0; }
+.footer-bottle-reveal_video-wrap { position: relative; width: 100%; line-height: 0; }
+
+/* ---- KADR TAŚMY ----
+   --tape-zoom      ile razy wideo jest szersze od ekranu (1 = desktop; mobile powiększa i przycina)
+   --tape-h         wysokość WIDOCZNEGO paska; auto = pełna proporcja po zoomie
+   --tape-shift-y   przesunięcie kadru w pionie, gdy --tape-h przycina */
+.footer-bottle-reveal_video-clip {
+  position: relative;
+  width: 100%;
+  height: var(--tape-h);
+  overflow: hidden;
+  line-height: 0;
+}
+.footer-bottle-reveal_video {
+  display: block;
+  height: auto;
+  width: calc(100% * var(--tape-zoom));
+  margin-left: calc(50% - 50% * var(--tape-zoom));   /* kadr trzymany na środku */
+  transform: translateY(var(--tape-shift-y));
+}
+
+/* ---- KNOBY BUTELKI (wartości ustawia key-pillars.js → CONFIG.bottle) ----
+   --bottle-size     szerokość butelki w % szerokości WIDEO (mnożone przez zoom)
+   --bottle-h        realna wysokość butelki w px (z pomiaru) → rezerwa miejsca w CTA
+   --bottle-nudge-y  podniesienie butelki (+ = w górę)
+   --bottle-overlap  o ile butelka wchodzi NA wideo (px)
+   --bottle-feather  rozmycie dolnej krawędzi (% wysokości butelki, ≤ overlap)
+   --bottle-tone     dostrajacz jasności NA WIERZCHU gammy z #bottleMatch */
+:root {
+  --tape-zoom: 1;
+  --tape-h: auto;
+  --tape-shift-y: 0px;
+  --bottle-size: 14;
+  --bottle-w: calc(var(--bottle-size) * var(--tape-zoom) * 1%);
+  --bottle-h: calc(var(--bottle-size) * var(--tape-zoom) * 1.25vw);
+  --bottle-nudge-y: 0%;
+  --bottle-overlap: 0px;
+  --bottle-feather: 0%;
+  --bottle-tone: 1;
+  --cta-bottle-gap: 8rem;
+}
+.footer-bottle-reveal_bottle {
+  position: absolute;
+  /* 100% = dół butelki na górnej krawędzi wideo; nudge podnosi, overlap wsuwa NA wideo */
+  bottom: calc(100% + var(--bottle-nudge-y) - var(--bottle-overlap));
+  left: 50%;
+  width: var(--bottle-w);
+  height: auto;
+  transform: translateX(-50%);
+  z-index: 3;                   /* nad sekcją wyżej */
+  pointer-events: none;
+  will-change: transform;
+  /* SZEW: najpierw gamma (dopasowanie krzywej do wideo — filtr #bottleMatch w index.html),
+     potem ewentualny dostrajacz jasności; na końcu miękkie zejście dolnej krawędzi. */
+  filter: url(#bottleMatch) brightness(var(--bottle-tone));
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--bottle-feather)), transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 calc(100% - var(--bottle-feather)), transparent 100%);
+}
+
+
+/* ============================================================
+   CONTAINER — 1376px (86rem) NA CAŁEJ STRONIE (decyzja Tomka 2026-07-24).
+   Override kanonu _shared (.container = 84rem). Sekcje wf mają własny
+   --_g-layout-and-spacing---container-width (też ustawiony na 86rem).
+   ============================================================ */
+.container { max-width: 86rem; }  /* 1376 */
+
+/* ============================================================
+   FLUID ROOT FONT-SIZE (styl Webflow / Client-First) — GLOBALNE skalowanie strony.
+   Cały layout w rem; root px liczony płynnie z szerokości viewportu (interpolacja
+   liniowa między punktami). Strojenie skali = TYLKO 4 zmienne w :root.
+   ⚠️ Nadpisuje _shared html{font-size:16px}. <479px skalowanie wyłączone.
+   ============================================================ */
+:root {
+  --font-from: 16;
+  --font-to: 19;
+  --vw-from: calc(1440 / 100);
+  --vw-to: calc(1889 / 100);
+  --coefficient: calc((var(--font-to) - var(--font-from)) / (var(--vw-to) - var(--vw-from)));
+  --base: calc((var(--font-from) - var(--vw-from) * var(--coefficient)) / 16);
+}
+/* ============================================================
+   SUFIT OD WYSOKOŚCI (2026-07-27, decyzja Tomka: WCHODZI)
+   Drabinka fluid skalowała stronę WYŁĄCZNIE od szerokości. Na oknach szerokich
+   i niskich (1920×800, 2300×830, 2560×900) tekst i diament rosły z szerokości,
+   a miejsca w pionie nie przybywało → nagłówek „Your pure-play…" był zasłaniany
+   przez kształt z dołu. Ten sam mechanizm od drugiej strony psuł wąskie i niskie (1440×660).
+   Zmierzone: luz ≈ 0,97·vh − 43,2·rem  →  luz ≥ 0 ⟺ rem ≤ vh/44,5.
+
+   Sufit = skala nie może przekroczyć tego, na co pozwala WYSOKOŚĆ okna.
+   Kalibracja wprost z artboardu 1440×800 → rem 16 przy 800px = 100vh × 0,02.
+   Zmierzone po wdrożeniu: 1440×800 i 1920×1080 BEZ ZMIAN, kolizje znikają.
+   Dotyka wyłącznie warstwy rem — sekcje 100vh, piny, wideo i kształt handoffu
+   są w vh/vw i nic o nim nie wiedzą.
+   ⚠️ WYŁĄCZONY <768: na mobile rem jest celowo zamrożony na 16 i od niego zależy
+   gutter 20px oraz szerokość kształtu (100vw − 2.5rem).
+   Strojenie: 0.02 w górę = strona większa na niskich oknach.
+   ============================================================ */
+:root { --rem-cap: 999px; }
+@media (min-width: 768px) { :root { --rem-cap: calc(100vh * 0.02); } }
+
+html {
+  font-size: min(calc(var(--base) * 1rem + var(--coefficient) * 1vw), var(--rem-cap));
+}
+@media screen and (max-width: 1440px) {
+  :root { --font-from: 11; --font-to: 16; --vw-from: calc(991 / 100);  --vw-to: calc(1440 / 100); }  /* 13→11 (2026-07-24): desktop skaluje się PROPORCJONALNIE do ramy 1440 → mieści się do 992px bez nakładania */
+}
+/* 2026-07-24 FIX CIĄGŁOŚCI: pasma muszą się STYKAĆ wartościami na granicach,
+   inaczej rem skacze na jednym pikselu szerokości. Było:
+     991px → 14px, a 992px → 11.01px   (skok 21%)
+     479px → 16px, a 480px → 12.00px   (skok 25%)
+
+   Drabinka wyprowadzona z DWÓCH artboardów Figmy — oba rysowane przy rem 16:
+     desktop 1440 (`4473:4434`) i mobile 375 (`4473:6648`, heading 36 = 2.25rem×16).
+   Stąd rem = 16 na obu końcach, a pasma pośrodku tylko je łączą:
+     ≤767      16 stałe    ← baza artboardu mobile (pixel-perfect na 375)
+     767→991   16 → 11     ← tablet: rama desktopowa kurczy się proporcjonalnie
+     991→1440  11 → 16     ← 11 = 991/1440×16 (bez zmian, celowe)
+     >1440     16 → 19
+   Granica 767 jest też granicą LAYOUTU (slider ↔ stack), więc zmiana skali
+   pokrywa się ze zmianą układu. Pasmo 479 zlikwidowane — niepotrzebne. */
+@media screen and (max-width: 991px) {
+  :root { --font-from: 16; --font-to: 11; --vw-from: calc(767 / 100);  --vw-to: calc(991 / 100); }
+}
+@media screen and (max-width: 767px) {
+  :root { --font-from: 16; --font-to: 16; --vw-from: calc(320 / 100);  --vw-to: calc(767 / 100); }
+}
+
+
+/* ============================================================
+   WYRÓWNANIE DO KONTENERA (2026-07-24) — wszystkie elementy site-level i staty
+   przypięte do krawędzi KONTENERA (86rem, wycentrowany), nie do krawędzi viewportu.
+   --container-gutter = odległość krawędzi kontenera od krawędzi ekranu
+   (na szerokich = (100vw−86rem)/2; min 3rem = padding sekcji).
+   Nadpisuje shared nav.css / contact-cta page-scoped (bez ruszania _shared).
+   ============================================================ */
+/* 2026-07-24: min 3rem → 2rem, bo poziomy padding sekcji zjechał globalnie 48 → 32
+   (decyzja Tomka, za Figmą). Na 1440 daje to gutter dokładnie 32 i content 1376. */
+:root { --container-gutter: max(2rem, calc((100vw - 86rem) / 2)); }
+
+/* nav (baza + kopia w masce — obie .nav_component): treść w obrębie kontenera */
+.nav_component { padding-left: var(--container-gutter); padding-right: var(--container-gutter); }
+
+/* Get in touch - 2026-07-26: element PRZENIESIONY do .home-hero_component (patrz index.html).
+   Containing block = komponent hero (position:relative, min-height:100vh), wiec:
+     right: 0 == prawa krawedz kontenera (dawne right: var(--container-gutter)),
+   a `top: calc(100vh - 5rem)` liczy sie teraz od gornej krawedzi komponentu, ktora
+   lezy na 0 dokumentu (sekcja hero ma padding-top: 0) -> ta sama pozycja co przedtem.
+   Zweryfikowane headless 1440x800: y = 720 px w obu wersjach. */
+.contact-cta_component {
+  position: absolute;                /* było fixed — teraz scrolluje w górę razem z hero (jak strzałka) */
+  right: 0; top: calc(100vh - 5rem); bottom: auto; left: auto;
+  z-index: 4;                        /* nad overlayem hero (3), pod navem (fixed 50) */
+}
+
+
+/* ============================================================
+   UJEDNOLICENIE BOCZNEGO PADDINGU (2026-07-24) — nagłówek „Your pure…" siedzi w sekcji
+   how-it-works (padding:0, bo wideo full-bleed), więc jego .container na wąskim dotykał
+   krawędzi. Zamiast max-width:86rem (centrowanie) → pełna szerokość + gutter: content
+   box = 100vw − 2×gutter = 86rem na szerokim (wycentrowany), a na wąskim ma gutter jak reszta.
+   ============================================================ */
+.home-how-it-works_header { max-width: none; padding-left: var(--container-gutter); padding-right: var(--container-gutter); }
+
+
+/* ============================================================
+   LOADER — Lottie 01D (2026-07-24): pełny ekran; ekspansja koła w Lottie = green-cover.
+   Zastąpiła .loader_marks (dwa kształty). z-index nad captionami, żeby cover je zakrył. */
+.loader_lottie { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.loader_lottie svg { display: block; }
+
+
+/* ============================================================
+   CTA + FOOTER BOTTLE REVEAL — MOBILE (2026-07-26, z _code/cta-bottle-reveal/)
+   Figma: desktop 4473:4736 (1440×800), mobile 4473:6811 (375×676).
+   1) TAŚMA: fiolki przy pełnej szerokości byłyby mikroskopijne w stosunku do butelki,
+      więc wideo powiększamy i przycinamy do środka. Butelka rośnie razem z nim
+      (jest % szerokości WIDEO, nie ekranu) — dlatego mnożenie przez --tape-zoom.
+   2) OKRĘGI: mobile ma WŁASNY układ. ⌀ względem ekranu jest w obu takie samo
+      (1059/1440 = 73,5 %, 275/375 = 73,3 %), ale na desktopie górny okrąg wychodzi górą
+      poza sekcję, a na mobile OBA siedzą w dolnej połowie jako aureola wokół butelki.
+      W rem by nie zagrało: przy root 14px ⌀ wyszłoby 926px = 247 % szerokości ekranu.
+      Stąd vw + kotwiczenie od DOŁU sekcji (punktem odniesienia jest butelka i taśma).
+        ⌀      275/375                                  =  73,33vw
+        górny  dolna krawędź 26px nad dołem ramki       =   6,93vw
+        dolny  dolna krawędź 202px pod dołem ramki      = −53,87vw
+   3) ŁAMANIE TEKSTU: w Figmie nagłówek ma 259/375 (4 linie), podtytuł 300/375.
+   ============================================================ */
+@media (max-width: 767px) {
+  :root { --tape-zoom: 2.6; }
+
+  .home-cta_circle {
+    width: 73.33vw;
+    height: 73.33vw;
+    margin-left: -36.665vw;
+  }
+  /* ⚠️ `top: auto` MUSI być na tym samym poziomie specyficzności co reguła desktopowa
+     (.home-cta_circle.is-top = 0,2,0) — inaczej desktopowe `top` w rem wygrywa. */
+  .home-cta_circle.is-top    { top: auto; bottom: 6.93vw; }
+  .home-cta_circle.is-bottom { top: auto; bottom: -53.87vw; }
+
+  .home-cta_heading  { max-width: 69vw; }
+  .home-cta_subtitle { max-width: 80vw; }
+}
+
+
+/* ============================================================
+   ████ MOBILE ≤767 — HERO + PINNED FLOW (prototyp 2026-07-26) ████
+   Artboardy Figma: 375×676. Poniżej 767 root rem jest ZAMROŻONY na 16
+   (drabinka fluid: --font-from 16 → --font-to 16), więc px/16 = rem 1:1
+   i artboard przenosi się bez przeliczania.
+
+   ZASADA (kanon): @media zmienia UKŁAD, nigdy ROZMIAR. Zero font-size tutaj —
+   typografia jedzie z _shared/styleguide.css (is-h-l @767 = 2.25rem = 36px,
+   czyli dokładnie nagłówek z artboardu). Wartości będące „proporcją ekranu",
+   a nie dystansem z artboardu, idą w vw/%, nie w rem.
+   ============================================================ */
+@media (max-width: 767px) {
+
+  /* --- GUTTER: JEDNO źródło prawdy = 20px (Figma 375) ---------------------
+     Przedtem na mobile rozjeżdżały się trzy wartości:
+       .section            1rem  = 16px   (_shared/styleguide.css)
+       --container-gutter  2rem  = 32px   (max() nie ma pasma mobile → zawsze 2rem)
+       design                     20px
+     Efekt: nav / CTA / statsy siedziały na 32, a treść sekcji na 16.
+     Teraz .section CZYTA gutter, więc liczba jest dokładnie jedna. */
+  :root { --container-gutter: 1.25rem; }
+  .section {
+    padding-left: var(--container-gutter);
+    padding-right: var(--container-gutter);
+  }
+
+  /* ---------------- HERO ---------------- */
+  /* desktop: blok wyśrodkowany; mobile: do GÓRY i do LEWEJ */
+  .home-hero_component {
+    text-align: left;
+    padding-top: 4.875rem;      /* 78px — górna krawędź H1 pod navem (Figma 375) */
+    padding-bottom: 1.25rem;
+  }
+  .home-hero_heading {
+    max-width: none;            /* desktop ma 50rem + auto marginesy (centrowanie) */
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* CTA: z prawego dolnego rogu → zwykły flow pod podtytułem.
+     display wraca, bo _shared/nav.css chowa je od ≤991 (`display:none`). */
+  .contact-cta_component {
+    position: static;
+    display: inline-flex;
+    margin-top: 2.25rem;
+  }
+
+  /* strzałka scrolla: ze środka na dolny-lewy róg, na tym samym gutterze */
+  .home-hero_arrow {
+    left: var(--container-gutter);
+    right: auto;
+    bottom: 1.25rem;
+    transform: none;            /* desktop centruje przez translateX(-50%) */
+  }
+
+  /* ---------------- PINNED FLOW: HOW IT WORKS ---------------- */
+  /* nagłówek „Your pure-play…" — do lewej, wyżej niż desktopowe 12.5rem */
+  .home-how-it-works_header {
+    text-align: left;
+    padding-top: 5.875rem;      /* 94px — górna krawędź H2 (Figma 375) */
+  }
+  /* nawiasy [ ] — na artboardzie mobile ich nie ma */
+  .home-how-it-works_bracket { display: none; }
+
+  /* wideo: na mobile NIE jest już zwykłym coverem — rozmiar i pozycję liczy JS
+     (applyVideoZoom), bo skala musi wynikać z DOCELOWEJ SZEROKOŚCI SHAPE'A,
+     nie z wypełnienia ekranu. Tu tylko rama: przycięcie + tło pod letterboxem. */
+  .home-how-it-works_media {
+    overflow: hidden;
+    background: var(--deep-green);
+  }
+  /* Wideo zostaje zwykłym coverem (wymiary z bazowego CSS). Kadr zmienia WYŁĄCZNIE
+     transform sterowany scrollem (applyVideoFit) — pełny ekran przez większość sekwencji,
+     dojazd do kształtu dopiero na końcu.
+     --vfade: długość gradientu rozpuszczającego górną krawędź w deep-green. 0px = brak
+     gradientu (twardy stop na 0 → maska w pełni kryjąca). Rośnie razem z dojazdem, bo
+     szew POWSTAJE dopiero przy zjeździe — przy coverze nie ma czego rozpuszczać. */
+  .home-how-it-works_video {
+    --vfade: 0px;
+    position: absolute;
+    /* wymiary liczy applyVideoFit — dokładnie z aspektu klatki, więc `fill` nie zniekształca.
+       ⚠️ NIE `cover` + transform: cover przycina do boxa elementu, więc skalowanie elementu
+       zwężało też samo okno na wideo (zielone pasy po bokach). */
+    object-fit: fill;
+    will-change: width, height, left, top;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--vfade));
+            mask-image: linear-gradient(to bottom, transparent 0, #000 var(--vfade));
+  }
+
+  /* statsy: z pływającej kolumny 300px po prawej → pełna szerokość contentu */
+  .home-how-it-works_stats {
+    left: var(--container-gutter);
+    right: var(--container-gutter);
+    width: auto;
+  }
+  .home-how-it-works_stats.is-set-1 { top: auto; bottom: 0; }         /* takt 2 — dół ekranu */
+  .home-how-it-works_stats.is-set-2 { top: 5.9375rem; bottom: auto; } /* takt 3 — 95px od góry */
+
+  /* Figma 375 pokazuje DWA punkty na set, desktop trzy. Trzeci chowamy,
+     NIE usuwamy — desktop zostaje nietknięty, a JS pomija go po computed display. */
+  .home-how-it-works_stats .home-how-it-works_stat:nth-child(3) { display: none; }
+
+  /* WHAT WE DO — już siedzi na left: var(--container-gutter), więc gutter
+     naprawia się sam; korekta tylko dolnego odstępu (Figma: 20px, było 32). */
+  .home-how-it-works_what-we-do { bottom: 1.25rem; }
+
+  /* --- łamanie nagłówka „Your pure-play…" ---------------------------------
+     <br> w HTML to breaki DESKTOPOWE; na 375 dają 5 linii zamiast 4 z artboardu.
+     Zdejmowane w JS (initHowItWorks), NIE tutaj — `br { display: none }` nie działa,
+     bo SplitText przebudowuje kontener na linie zanim ta reguła miałaby znaczenie. */
+
+  /* loader: captiony też na wspólnym gutterze (desktop ma 1.875rem = 30px) */
+  .loader_caption.is-left  { left: var(--container-gutter); top: 1.25rem; }
+  .loader_caption.is-right { right: var(--container-gutter); bottom: 1.25rem; }
+
+  /* --- ZAKRES PROTOTYPU -----------------------------------------------------
+     Sekcje od key-pillars w dół zostały USUNIĘTE Z DOM (patrz index.html), więc
+     nie ma tu już czego chować — zniknęła też cała klasa błędów, którą tamto
+     `display: none` generowało (ScrollTriggery na zapadniętych boksach).
+     Zostaje jedno: teksty We know / Our goal nie mają artboardu mobile i rozjeżdżają
+     się w poziomie, więc na ≤767 są wygaszone. Dzięki temu apla kończy jako czysta
+     mist-owa apla z samym kształtem.
+     ⚠️ Do zdjęcia, gdy powstanie artboard We know na 375. */
+  .home-we-know_wp1,
+  .home-we-know_w2,
+  .home-we-know_title-wrap { display: none; }
+}

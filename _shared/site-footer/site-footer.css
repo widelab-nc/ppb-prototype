@@ -1,0 +1,185 @@
+/* ============================================================
+   Polpharma Biologics — SITE FOOTER (globalny, _shared/site-footer)
+   Figma: desktop 4572:7327 (1440×799) · mobile 4677:8902 (375×971)
+   file „Polpharma Biologics - Webflow Starter" (eamVOAaNZDwHQKofLeV2Il)
+
+   Warstwa globalna (typografia is-*, kolory, .section/.container,
+   guard [data-reveal], .rv-*) → ../styleguide.css. Tu TYLKO namespace
+   site-footer_* + combo .is-site-footer. Zero redefinicji is-*.
+   Jednostki: rem (px/16). Wyjątki wg kanonu: border 1px, radius, %.
+   ============================================================ */
+
+/* ---------- lokalne zmienne komponentu (jedno miejsce strojenia) ---------- */
+.section.is-site-footer {
+  --sf-rule: rgba(255, 255, 255, 0.1);      /* obrys „nawiasów" (Figma) */
+  /* ⚠️ SZACUNEK Z RENDERU — MCP nie zwraca fillów boolean-op (ten sam problem
+     co przy Insights, patrz STATUS.md). Do potwierdzenia w Figmie.
+     Kanon z home-concept („From concept…") = fill .05 / stroke .22 — jeśli
+     kształty mają być identyczne w całym serwisie, zejdź na te wartości. */
+  --sf-shape-fill: rgba(255, 255, 255, 0.1);
+  --sf-shape-stroke: rgba(255, 255, 255, 0.22);
+
+  background-color: var(--deep-green);
+  overflow: clip;                 /* kształty nie rozpychają strony */
+  /* Figma: padding-top 60, bottom 32; boki zostają z .section (32/24/16) */
+  padding-top: 3.75rem;
+  padding-bottom: 2rem;
+}
+
+/* ============================================================
+   LAYOUT — 2 kolumny (lewa: kształty, prawa: treść 679)
+   1440: 32 | 697 (kształty) | 679 (treść) | 32
+   ============================================================ */
+.site-footer_component {
+  display: grid;
+  grid-template-columns: 1fr 42.4375rem;   /* 679 */
+  align-items: stretch;
+  min-height: 44.1875rem;                  /* 707 = 799 − 60 − 32 (ramka z Figmy) */
+}
+
+.site-footer_col {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;                               /* 32 */
+  color: var(--lab-white);
+}
+
+/* ---------- Headquaters ---------- */
+.site-footer_hq {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;                            /* 12 */
+  width: 17.4375rem;                       /* 279 */
+}
+.site-footer_hq-address { font-style: normal; }
+.site-footer_hq-address a { text-decoration: none; color: inherit; }
+.site-footer_hq-address a:hover { text-decoration: underline; }
+
+/* ---------- „nawiasy" (Rectangle 34627839 / 34627888) ---------- */
+.site-footer_rule {
+  height: 1.25rem;                         /* 20 */
+  border: 1px solid var(--sf-rule);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+/* dolny = odbicie górnego (w Figmie -scale-y-100; tu jawnie, żeby nie
+   kolidować z transformem animacji rozrostu) */
+.site-footer_rule.is-flipped {
+  border-top: 0;
+  border-bottom: 1px solid var(--sf-rule);
+  border-radius: 0 0 10px 10px;
+}
+/* stan początkowy animacji „otwierania" (JS rozciąga do 1) */
+[data-rule-reveal] {
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ---------- nawigacja ---------- */
+.site-footer_nav {
+  display: flex;
+  justify-content: space-between;
+  width: 20.75rem;                         /* 332 */
+}
+.site-footer_links,
+.site-footer_legal { list-style: none; display: flex; flex-direction: column; }
+.site-footer_links { gap: 0.75rem; width: 7.6875rem; }  /* 12 · 123 */
+.site-footer_legal { gap: 0.625rem; white-space: nowrap; } /* 10 */
+
+/* hover — NIE MA GO W FIGMIE, do zatwierdzenia albo wycięcia */
+.site-footer_link,
+.site-footer_legal-link { transition: opacity 0.25s ease, color 0.25s ease; }
+.site-footer_link:hover { color: var(--light-green); }
+.site-footer_legal-link:hover { opacity: 1; }
+
+/* ---------- dół: nawias + stopka prawna (dosunięte do dołu) ---------- */
+.site-footer_bottom {
+  margin-top: auto;                        /* wypełnia pustkę 429→693 z Figmy */
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;                               /* 32 */
+}
+.site-footer_meta { display: flex; justify-content: space-between; }
+
+/* ============================================================
+   KSZTAŁTY — brand mark (koło + kwadrat z wyciętym kołem)
+   Ten sam motyw co „From concept to commercial supply".
+   Stan docelowy: obok siebie z przerwą 1rem (decyzja Tomka).
+   ⚠️ ODSTĘPSTWO OD FIGMY: w Figmie kształty NACHODZĄ na siebie
+   (kwadrat 32–252, koło 148–358 → −104px). Zmiana = `gap` niżej.
+   ============================================================ */
+.site-footer_shapes {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;                         /* pozycja spoczynkowa = dół kolumny (1:1 z Figmą) */
+  /* STICKY: dopóki dół komponentu jest poniżej ekranu, kształty są podciągane
+     do 2rem nad krawędzią viewportu → widać je od pierwszego piksela footera
+     i stoją w miejscu, gdy footer wjeżdża. Lądują dokładnie w pozycji z Figmy,
+     bo `bottom` = padding-bottom sekcji.
+     ⚠️ `.is-site-footer` ma `overflow: clip`, a NIE `hidden` — clip nie tworzy
+     scroll-containera, więc sticky dalej działa względem viewportu.
+     Zamiana na `hidden` ZABIJE sticky. */
+  position: sticky;
+  bottom: 2rem;
+  display: flex;
+  align-items: center;                     /* koło wyśrodkowane na kwadracie */
+  justify-content: flex-start;
+  gap: 1rem;
+}
+.site-footer_square {
+  width: 13.75rem;                         /* 220 */
+  height: 13.75rem;
+  flex: none;
+  overflow: visible;
+  will-change: transform;
+}
+.site-footer_circle {
+  width: 13.125rem;                        /* 210 */
+  height: 13.125rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--sf-shape-fill);
+  border: 1px solid var(--sf-shape-stroke);
+  will-change: transform;
+}
+.site-footer_shape-fill { fill: var(--sf-shape-fill); }
+.site-footer_shape-stroke { fill: none; stroke: var(--sf-shape-stroke); stroke-width: 1; }
+
+/* ============================================================
+   ≤991 — ZMIANA LAYOUTU (nie rozmiarów): jedna kolumna,
+   kształty pod treścią, kolejność odwrócona (koło przy krawędzi).
+   Wymiary zostają w rem — skalowaniem rządzi fluid root font-size.
+   ============================================================ */
+@media (max-width: 991px) {
+  .site-footer_component {
+    grid-template-columns: 1fr;
+    gap: 7.5rem;                           /* 120 */
+    min-height: 0;
+  }
+  .site-footer_col    { grid-column: 1; grid-row: auto; order: 1; gap: 1.5rem; }  /* 24 */
+  /* mobile: kształty są w normalnym flow POD treścią (tak jest w Figmie),
+     więc sticky wyłączamy — nie ma po czym jechać i tylko myli */
+  .site-footer_shapes { grid-column: 1; grid-row: auto; order: 2; align-self: start; position: relative; bottom: auto; }
+  /* mobile: koło przy krawędzi, kwadrat obok (odwrotnie niż na desktopie) */
+  .site-footer_circle { order: 1; }
+  .site-footer_square { order: 2; }
+
+  .site-footer_hq { width: 17.4375rem; max-width: 100%; }
+
+  .site-footer_rule          { height: 1rem; border-radius: 8px 8px 0 0; }
+  .site-footer_rule.is-flipped { border-radius: 0 0 8px 8px; }
+
+  .site-footer_nav   { flex-direction: column; gap: 3.75rem; width: 100%; }  /* 60 */
+  .site-footer_links { gap: 0.5rem; }      /* 8 */
+  .site-footer_legal { gap: 0.375rem; }    /* 6 */
+
+  .site-footer_bottom { margin-top: 0; gap: 1.5rem; }             /* 24 */
+  .site-footer_meta   { flex-direction: column; gap: 0.375rem; }  /* 6 */
+  .site-footer_rights { display: none; }   /* mobile: samo „© Polpharma Biologics" */
+
+  .site-footer_square { width: 10.25rem;  height: 10.25rem; }     /* 164 */
+  .site-footer_circle { width: 9.8125rem; height: 9.8125rem; }    /* 157 */
+}

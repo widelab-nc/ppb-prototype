@@ -1,0 +1,476 @@
+/* ============================================================
+   Polpharma Biologics — NAVBAR + NAV MASK + GET IN TOUCH (_shared)
+   Komponent globalny (Figma 3885:3085 dark / 4473:6892 light).
+   Kształt tła (pigułki + gooey) generuje nav-shape.js.
+   Maska koloru (system #2) — logika w nav-mask.js.
+   Markup: _shared/nav/nav.html (wklejany 1:1 na początek <body>).
+   ============================================================ */
+
+:root {
+  --nav-bg-blur: 15.1956px;      /* Figma Background blur 30.39 ÷ 2 (wariant dark) */
+  --nav-stroke-light: #E5E5E5;   /* border kształtu w wariancie light */
+  --nav-stroke-width: 2;         /* SVG px; clip połówkuje → efektywnie 1px inside */
+}
+
+.svg-defs { position: absolute; }
+
+/* ---------- NAV (site-level, fixed) ---------- */
+.nav_component {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+}
+.nav_brand { display: flex; align-items: center; position: relative; }
+/* prawdziwe logo (SVG 176×28) — białe na navie / ciemne w masce (dwa pliki, theming = src) */
+.nav_brand-logo { height: 1.75rem; width: auto; display: block; }
+
+/* ---------- Navigation Links (gooey) ----------
+   RIGID: nav nigdy się nie kurczy (kisiel zależy od stałej geometrii).
+   Poniżej szerokości gdzie by kolidował z logo → hamburger (@media 991).
+   Dzięki temu pozycje linków są niezależne od viewportu i kształt SVG
+   nie ma jak się rozjechać. */
+.nav_links-component {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;            /* 10px */
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* motyw: ciemne tło strony
+   FILL 12% (Figma: 7% + blur) — ŚWIADOME odejście: backdrop-filter w Chrome
+   bywa nieaktywny nad tłem malowanym PO navie (loader→hero) i nad żywym
+   canvas/wideo (stale snapshot, patrz nav-menu.js). Pigułki muszą czytać się
+   czysto TAKŻE bez blura → mocniejsza baza, blur = progressive enhancement.
+   NIE wracać do 0.07 bez rozwiązania repaint-invalidation. */
+.nav_links-component.is-dark-bg {
+  --nav-link-color: var(--lab-white);
+  --nav-shape-fill: var(--mist);
+  --nav-shape-fill-opacity: 0.12;
+  --nav-shape-stroke: none;
+  /* dropdown pills (Figma 5018:13236) — mist (12%, jw.) + inner shadow + bg blur */
+  --nav-drop-bg: rgba(230, 239, 239, 0.12);
+  --nav-drop-stroke: transparent;
+  --nav-drop-shadow: inset -1.129px 1.129px 2.257px rgba(255, 255, 255, 0.15);
+  --nav-drop-blur: blur(15.196px);
+}
+.nav_links-component.is-dark-bg .nav_menu-bg path.nav_menu-shape {
+  filter: url(#navInnerShadow);
+}
+
+/* motyw: jasne tło strony */
+.nav_links-component.is-light-bg {
+  --nav-link-color: var(--deep-green);
+  --nav-shape-fill: var(--lab-white);
+  --nav-shape-fill-opacity: 1;
+  --nav-shape-stroke: var(--nav-stroke-light);
+  /* dropdown pills — light: Lab White + 1px stroke, bez blur/shadow */
+  --nav-drop-bg: var(--lab-white);
+  --nav-drop-stroke: var(--nav-stroke-light);
+  --nav-drop-shadow: none;
+  --nav-drop-blur: none;
+}
+.nav_links-component.is-light-bg .nav_menu-blur { display: none; }
+
+.nav_menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;            /* 10px — od tego liczone są "fale" łączników */
+  height: 2.625rem;         /* 42px */
+  flex-shrink: 0;
+}
+/* warstwa 1: backdrop blur przycięty do kształtu (clip-path z JS; tylko dark)
+   JEDEN układ współrzędnych z kształtem: top/left/right = 0 → clip-path
+   dostaje DOKŁADNIE tę samą ścieżkę `d` co .nav_menu-shape (bez żadnych
+   przesunięć — historyczny inset:-24 + shift +24 w nav-shape.js dawał
+   w Chrome rozjechany/powiększony frost względem pigułek).
+   Tylko bottom: -1.5rem — box wystaje W DÓŁ poza pigułkę: backdrop-filter
+   wygasza się przy krawędzi elementu (mało próbek tła) i dawało to ostry
+   pas u DOŁU; wydłużenie w dół nie zmienia początku układu współrzędnych,
+   więc clip zostaje 1:1 z kształtem, a strefa wygaszania wypada pod pigułką.
+   UWAGA fluid rem: clip blura liczony w REALNYCH px z wysokości pigułki
+   (nav-shape.js, sy=hReal/42) — clip-path nie skaluje się z remem sam. */
+.nav_menu-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: -1.5rem;
+  -webkit-backdrop-filter: blur(var(--nav-bg-blur));
+  backdrop-filter: blur(var(--nav-bg-blur));
+  pointer-events: none;
+}
+/* warstwa 2: kształt Union
+   WAŻNE: szerokość z ATRYBUTU width (= viewBox, ustawiane w nav-shape.js),
+   NIE z CSS. Gdyby CSS rozciągał szerokość (inset:0/right:0), a viewBox
+   pozostał z innej klatki, SVG przeskalowałby całą ścieżkę → kształt
+   rozjeżdża się przy zmianie szerokości. Dlatego tylko left/top + height. */
+.nav_menu-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+}
+.nav_menu-shape {
+  fill: var(--nav-shape-fill);
+  fill-opacity: var(--nav-shape-fill-opacity);
+  stroke: var(--nav-shape-stroke);
+  stroke-width: var(--nav-stroke-width);
+  /* clip-path do własnego kształtu ustawia JS → stroke renderuje się inside */
+}
+/* warstwa 3: linki — auto-szerokość z paddingu, kształt nadąża */
+.nav_link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 1.25rem;       /* 20px — jak w Figmie */
+  color: var(--nav-link-color);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav_link.is-drop { gap: 0.125rem; }
+.nav_link-arrow {
+  width: 1.125rem;          /* 18px */
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+/* btn - cta (identyczny w obu wariantach) */
+.nav_cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.625rem;         /* 42px */
+  padding: 0.625rem 1.375rem; /* 10px 22px */
+  border-radius: 1.25rem;   /* 20px */
+  background: var(--red);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* ---------- Dropdown "Company" (Figma 5051:3580) ----------
+   Trigger + panel opakowane w .nav_drop (flex item, BEZ position —
+   dzięki temu .nav_link mierzy offset względem .nav_menu, a panel
+   pozycjonuje się absolutnie też względem .nav_menu). */
+.nav_link.is-drop { cursor: pointer; }
+.nav_link-arrow { transition: transform 0.25s ease; }
+.nav_drop { display: flex; align-items: center; height: 100%; flex-shrink: 0; }
+.nav_drop.is-open .nav_link-arrow { transform: rotate(180deg); }
+
+.nav_dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding-top: 0.625rem;     /* 10px — transparentny "mostek" hover = odstęp od navu */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;             /* 10px między pigułkami */
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 0.25s;
+  z-index: 2;
+}
+.nav_drop.is-open .nav_dropdown {
+  visibility: visible;
+  pointer-events: auto;
+  transition: visibility 0s;
+}
+.nav_dropdown-link {
+  display: flex;
+  align-items: center;
+  height: 2.625rem;          /* 42px */
+  padding: 0 1.375rem;       /* 22px — jak w Figmie */
+  border-radius: 9999px;
+  white-space: nowrap;
+  color: var(--nav-link-color);
+  background: var(--nav-drop-bg);
+  border: 1px solid var(--nav-drop-stroke);
+  box-shadow: var(--nav-drop-shadow);
+  -webkit-backdrop-filter: var(--nav-drop-blur);
+  backdrop-filter: var(--nav-drop-blur);
+  /* stan spoczynku: lekko podniesione + wygaszone (reveal per-item) */
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.nav_drop.is-open .nav_dropdown-link { opacity: 1; transform: none; }
+.nav_drop.is-open .nav_dropdown-link:nth-child(1) { transition-delay: 0.03s; }
+.nav_drop.is-open .nav_dropdown-link:nth-child(2) { transition-delay: 0.08s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav_dropdown-link { transition: opacity 0.15s linear; transform: none; }
+  .nav_link-arrow { transition: none; }
+}
+
+/* ---------- NAV MASK (system #2: maska koloru na overlayu) ----------
+   Warstwa fixed nad bazowym nav; górna krawędź CLIP-PATH = krawędź jasnej
+   sekcji (nav-mask.js, scrub 1:1). Kopia w środku stoi NIERUCHOMO.
+   UWAGA: celowo clip-path, NIE overflow+kontr-transform — overflow: clip
+   przepuszczał composited/fixed warstwy (ghost logo). */
+.nav-mask_component {
+  position: fixed;
+  inset: 0;
+  z-index: 51;              /* nad bazowym nav (50); pod loaderem (100) */
+  pointer-events: none;
+  clip-path: inset(100% 0% 0% 0%); /* start: nic nie widać (GSAP animuje) */
+  will-change: clip-path;
+}
+/* kopia w masce jest CZYSTO wizualna — NIC w środku nie może łapać myszy.
+   Bez tego: .nav_drop.is-open .nav_dropdown { pointer-events:auto } nadpisywało
+   dziedziczone none, a maska (z-51) leży NAD klikalnym bazowym navem (z-50) →
+   po otwarciu dropdownu jej panel kradł kursor i bazowy dostawał mouseleave
+   (dropdown zamykał się przy zjeżdżaniu na itemy nad jasną sekcją). */
+.nav-mask_component * { pointer-events: none !important; }
+.nav-mask_inner {
+  position: absolute;
+  inset: 0;
+}
+
+/* kopia CIEMNA (jasne tła) — ABSOLUTE, nie fixed! (fixed uciekał spod clipu) */
+.nav-mask_inner .nav_component.is-dark { position: absolute; }
+
+/* ---------- GET IN TOUCH (site-level, fixed) ---------- */
+.contact-cta_component {
+  position: fixed;
+  right: 2rem; bottom: 2rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  color: var(--deep-green);
+}
+.contact-cta_dots {
+  width: 0.75rem; height: 0.75rem;
+  background:
+    radial-gradient(circle, var(--red) 0.125rem, transparent 0.125rem) 0 0 / 0.375rem 0.375rem;
+}
+.contact-cta_label { font-weight: 500; }
+
+/* ============================================================
+   MOBILE — hamburger + pełnoekranowe menu (≤991px)
+   Figma: closed 4473:6110 / open 4473:6772
+   ============================================================ */
+
+/* ---------- hamburger (czerwona pigułka) ---------- */
+.nav_hamburger {
+  display: none;                 /* desktop: ukryty (patrz @media) */
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;                /* 60px */
+  height: 2.25rem;               /* 36px */
+  padding: 0;
+  border: none;
+  border-radius: 3.75rem;
+  background: var(--red);
+  cursor: pointer;
+}
+.nav_hamburger-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 1.25rem;                /* 20px */
+}
+.nav_hamburger-lines span {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--lab-white);
+}
+
+/* ---------- overlay (Deep Green, fixed, pełny ekran) ---------- */
+.nav-mobile {
+  position: fixed;
+  inset: 0;
+  z-index: 80;                   /* nad navem (50) i maską (51); pod loaderem (100) */
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;              /* 20px */
+  background: var(--deep-green);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+}
+.nav-mobile.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.35s ease, visibility 0s;
+}
+
+.nav-mobile_bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-mobile_bar .nav_brand-logo { height: 1.5rem; }  /* 24px, jak w Figmie mobile */
+
+.nav-mobile_close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;                /* 60px */
+  height: 2.25rem;               /* 36px */
+  padding: 0;
+  border: none;
+  border-radius: 3.75rem;
+  background: var(--lab-white);
+  color: var(--deep-green);
+  cursor: pointer;
+}
+.nav-mobile_close svg { width: 0.875rem; height: 0.875rem; display: block; }
+
+/* ---------- lista itemów ---------- */
+.nav-mobile_list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3125rem;                /* 21px */
+  margin-top: 2.5rem;            /* start ~96px od góry ekranu */
+}
+.nav-mobile_link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  color: var(--lab-white);
+}
+.nav-mobile_link .is-t-m { color: var(--lab-white); }
+/* dekoracyjny łącznik: górna + prawa krawędź, zaokrąglony róg TR, 20% */
+.nav-mobile_divider {
+  width: 100%;
+  height: 1rem;                  /* 16px */
+  margin-bottom: -0.375rem;      /* -6px — tekst wchodzi na linię */
+  border-top: 1px solid #D9D9D9;
+  border-right: 1px solid #D9D9D9;
+  border-top-right-radius: 0.5rem;
+  opacity: 0.2;
+}
+
+/* reveal itemów po otwarciu (stagger) */
+.nav-mobile_link {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.nav-mobile.is-open .nav-mobile_link { opacity: 1; transform: none; }
+.nav-mobile.is-open .nav-mobile_link:nth-child(1) { transition-delay: 0.06s; }
+.nav-mobile.is-open .nav-mobile_link:nth-child(2) { transition-delay: 0.10s; }
+.nav-mobile.is-open .nav-mobile_link:nth-child(3) { transition-delay: 0.14s; }
+.nav-mobile.is-open .nav-mobile_link:nth-child(4) { transition-delay: 0.18s; }
+.nav-mobile.is-open .nav-mobile_link:nth-child(5) { transition-delay: 0.22s; }
+.nav-mobile.is-open .nav-mobile_link:nth-child(6) { transition-delay: 0.26s; }
+.nav-mobile.is-open .nav-mobile_link:nth-child(7) { transition-delay: 0.30s; }
+
+/* ---------- CTA "Get in touch" (dół, czerwony pełny szer.) ---------- */
+.nav-mobile_cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;                 /* 10px */
+  height: 2.625rem;              /* 42px */
+  margin-top: auto;              /* dosuń do dołu */
+  padding: 0.625rem 1.375rem;    /* 10px 22px */
+  border-radius: 1.25rem;        /* 20px */
+  background: var(--red);
+}
+.nav-mobile_cta-dots {
+  width: 0.625rem;               /* 10px */
+  height: 0.625rem;
+  background: radial-gradient(circle, #fff 2px, transparent 2px) 0 0 / 0.375rem 0.375rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-mobile_link { transition: opacity 0.15s linear; transform: none; }
+}
+
+/* ============================================================
+   BREAKPOINT ≤991px (Webflow tablet): chowa desktopowy nav,
+   pokazuje hamburger; overlay dostępny tylko tu.
+   ============================================================ */
+@media (min-width: 992px) {
+  .nav-mobile { display: none; }
+}
+@media (max-width: 991px) {
+  .nav_links-component { display: none; }     /* pigułki + Contact (base i maska) */
+  .contact-cta_component { display: none; }   /* pływające Get in touch (desktop) */
+  .nav_hamburger { display: flex; }
+  .nav_component { padding: 1.25rem; }         /* 20px — jak w Figmie mobile */
+}
+
+/* blokada scrolla body gdy overlay otwarty */
+html.nav-mobile-open, body.nav-mobile-open { overflow: hidden; }
+
+/* ============================================================
+   MASKA NAV — pełne zakrycie bazowego nava przez jasną sekcję (2026-07-26).
+   Bazowy nav jest NIEWIDOCZNY, ale nadal KLIKALNY (hover/dropdown działa,
+   bo clip-path usuwa hit-testing, a opacity nie). Steruje tym system #2
+   (nav-mask.js) + page-scoped przejścia (initConceptNavTheme/initWfNavThemes).
+   ⚠️ !important, bo GSAP trzyma inline opacity:1 na [data-reveal="ui"].
+   ============================================================ */
+.nav_component.is-nav-covered { opacity: 0 !important; }
+
+/* ============================================================
+   MOBILE v2 (2026-07-26): hamburger ⇄ X (morph) + scroll overlaya.
+
+   JEDEN przycisk steruje open/close: gdy overlay otwarty, bazowy nav jest
+   wynoszony NAD overlay (z-90 > 80) i robi za pasek (logo + przycisk),
+   a trzy linie hamburgera morfują w X (rotacja skrajnych, środkowa znika).
+   Pasek wbudowany w overlay (.nav-mobile_bar: logo + osobny close) staje się
+   zbędny — chowamy go CSS-em (visibility zachowuje layout listy pod spodem).
+   Markup NIE zmieniany (kopie inline na stronach zostają jak są; przy
+   przenoszeniu do Webflow pasek overlaya można po prostu pominąć).
+   ============================================================ */
+
+/* morph linii: stan przycisku = aria-expanded (ustawia nav-menu.js) */
+.nav_hamburger { transition: background-color 0.3s ease; }
+.nav_hamburger-lines span {
+  transition: transform 0.3s ease, opacity 0.2s ease, background-color 0.3s ease;
+  transform-origin: 50% 50%;
+}
+/* offset skrajnych linii do środka = wysokość linii (1.5px) + gap (2px) */
+.nav_hamburger[aria-expanded="true"] { background: var(--lab-white); }
+.nav_hamburger[aria-expanded="true"] .nav_hamburger-lines span { background: var(--deep-green); }
+.nav_hamburger[aria-expanded="true"] .nav_hamburger-lines span:nth-child(1) {
+  transform: translateY(3.5px) rotate(45deg);
+}
+.nav_hamburger[aria-expanded="true"] .nav_hamburger-lines span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.nav_hamburger[aria-expanded="true"] .nav_hamburger-lines span:nth-child(3) {
+  transform: translateY(-3.5px) rotate(-45deg);
+}
+
+/* przy otwartym overlayu bazowy nav wjeżdża NAD niego i musi być widoczny
+   niezależnie od stanu maski (is-nav-covered / clip z nav-mask.js) */
+html.nav-mobile-open .nav_component:not(.is-dark) {
+  z-index: 90;               /* nad .nav-mobile (80) */
+  opacity: 1 !important;     /* wygrywa z .is-nav-covered (wyższa specyficzność) */
+  clip-path: none !important;
+}
+
+/* pasek overlaya zbędny (logo+close z bazowego nava) — visibility trzyma layout */
+.nav-mobile_bar { visibility: hidden; }
+
+/* scroll overlaya, gdy lista + CTA nie mieszczą się na ekranie */
+.nav-mobile {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-mobile_list { flex-shrink: 0; }
+.nav-mobile_cta { flex-shrink: 0; }

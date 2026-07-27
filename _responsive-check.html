@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<title>Polpharma — kontrola responsywności (home-full)</title>
+<style>
+  :root{
+    --bg:#0f1415; --panel:#171d1e; --line:#2a3436; --txt:#e6efef; --dim:#8fa3a5;
+    --ok:#16ABA9; --bad:#F55D5D; --accent:#16ABA9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px 18px 40px}
+  h1{font-size:15px;font-weight:600;letter-spacing:.01em}
+  h1 span{color:var(--dim);font-weight:400}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 6px}
+  .bar+.bar{margin-top:0}
+  .lbl{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-right:4px}
+  button{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:999px;
+         padding:6px 13px;font:inherit;font-size:13px;cursor:pointer}
+  button:hover{border-color:var(--dim)}
+  button.on{background:var(--accent);border-color:var(--accent);color:#04211f;font-weight:600}
+  .hint{color:var(--dim);font-size:12px;max-width:78ch;margin:10px 0 4px}
+  .hint b{color:var(--txt);font-weight:600}
+  .stage{display:flex;gap:22px;align-items:flex-start;margin-top:18px;overflow-x:auto;padding-bottom:8px}
+  .pane{flex:0 0 auto}
+  .cap{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:6px;font-size:12px}
+  .cap .name{font-weight:600}
+  .cap .rem{color:var(--dim);font-variant-numeric:tabular-nums}
+  .cap .rem b{color:var(--accent)}
+  .frame{position:relative;border:1px solid var(--line);background:#000;overflow:hidden}
+  iframe{border:0;display:block;transform-origin:top left;background:#0b3b3a}
+  .foot{color:var(--dim);font-size:12px;margin-top:22px;max-width:78ch}
+  code{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12px}
+</style>
+</head>
+<body>
+
+<h1>Kontrola responsywności <span>— home-full (cała strona) · home-part1 (wycinek)</span></h1>
+
+<p class="hint">
+  Odpal serwer z katalogu <code>_code/</code> (<code>python3 -m http.server 8000</code>) i otwórz ten plik
+  przez <code>http://localhost:8000/_responsive-check.html</code> — <b>nie</b> przez podwójne kliknięcie,
+  bo iframe'y muszą być z tego samego origin.
+</p>
+
+<div class="bar">
+  <span class="lbl">Okno</span>
+  <span id="sizes"></span>
+</div>
+<div class="bar">
+  <span class="lbl">Widok</span>
+  <button data-view="a" class="on">tylko home-full</button>
+  <button data-view="both">oba obok siebie</button>
+  <button data-view="b">tylko home-part1</button>
+  <span class="lbl" style="margin-left:14px">Podgląd</span>
+  <button data-zoom="fit" class="on">dopasuj do ekranu</button>
+  <button data-zoom="1">1:1</button>
+  <button id="reload">przeładuj oba</button>
+</div>
+
+<p class="hint">
+  <b>Na co patrzeć — trzy rzeczy ze zmian 2026-07-27.</b>
+  <b>1)</b> Nagłówek „Your pure-play biosimilar developer…" — kształt z dołu <b>nie ma</b> wchodzić na tekst.
+  Wcześniej wchodził na 1920×800, 2300×830, 2560×900 i 1440×660.
+  <b>2)</b> Sekcja We-know — kolumna tekstu ma stać <b>równo z krawędzią kontenera</b> (jak nagłówki wyżej),
+  a „We know" ma być <b>na środku</b> przerwy między kształtem a tekstem.
+  <b>3)</b> Akapit „that most biosimilar programs…" — doświetla się scrollem <b>wyraz po wyrazie</b>.
+  <br>Na <b>1440×800</b> i <b>1920×1080</b> nic nie powinno się zmienić względem tego, co znasz —
+  sufit włącza się tylko na oknach niskich względem szerokości.
+</p>
+
+<div class="stage" id="stage">
+  <div class="pane" id="paneA">
+    <div class="cap"><span class="name">home-full — CAŁA strona</span><span class="rem" id="remA">rem: –</span></div>
+    <div class="frame" id="frameA"><iframe id="a" src="home-full/index.html"></iframe></div>
+  </div>
+  <div class="pane" id="paneB">
+    <div class="cap"><span class="name">home-part1 — wycinek (+ mobile, + Lenis)</span><span class="rem" id="remB">rem: –</span></div>
+    <div class="frame" id="frameB"><iframe id="b" src="home-part1/index.html"></iframe></div>
+  </div>
+</div>
+
+<p class="foot">
+  Odczyt <code>rem</code> pod nazwą wariantu to realny <code>font-size</code> elementu <code>&lt;html&gt;</code>
+  w danym iframie — po nim najszybciej widać, czy sufit zadziałał. Iframe dostaje własny viewport,
+  więc <code>100vh</code> w środku = wysokość ramki; podgląd jest tylko przeskalowany wizualnie
+  (<code>transform: scale</code>) i nie zmienia logicznych wymiarów.
+</p>
+
+<script>
+  var SIZES = [
+    { w: 1440, h: 800,  note: 'artboard' },
+    { w: 1920, h: 1080, note: '' },
+    { w: 1920, h: 800,  note: 'kolizja' },
+    { w: 2300, h: 830,  note: 'kolizja' },
+    { w: 2560, h: 900,  note: 'kolizja' },
+    { w: 1440, h: 660,  note: 'kolizja' },
+    { w: 375,  h: 676,  note: 'mobile' }
+  ];
+
+  var state = { size: SIZES[0], view: 'a', zoom: 'fit' };
+
+  var sizesEl = document.getElementById('sizes');
+  SIZES.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.textContent = s.w + '×' + s.h + (s.note ? ' · ' + s.note : '');
+    b.onclick = function () {
+      state.size = s;
+      Array.prototype.forEach.call(sizesEl.children, function (c) { c.classList.remove('on'); });
+      b.classList.add('on');
+      apply();
+    };
+    if (i === 0) b.classList.add('on');
+    sizesEl.appendChild(b);
+  });
+
+  document.querySelectorAll('[data-view]').forEach(function (b) {
+    b.onclick = function () {
+      state.view = b.dataset.view;
+      document.querySelectorAll('[data-view]').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      apply();
+    };
+  });
+  document.querySelectorAll('[data-zoom]').forEach(function (b) {
+    b.onclick = function () {
+      state.zoom = b.dataset.zoom;
+      document.querySelectorAll('[data-zoom]').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      apply();
+    };
+  });
+  document.getElementById('reload').onclick = function () {
+    ['a', 'b'].forEach(function (id) {
+      var f = document.getElementById(id);
+      f.src = f.src;
+    });
+  };
+
+  function apply() {
+    var s = state.size;
+    var panes = state.view === 'both' ? 2 : 1;
+    document.getElementById('paneA').style.display = (state.view === 'b') ? 'none' : '';
+    document.getElementById('paneB').style.display = (state.view === 'a') ? 'none' : '';
+
+    var avail = (window.innerWidth - 60 - (panes === 2 ? 22 : 0)) / panes;
+    var availH = window.innerHeight - 300;
+    var k = 1;
+    if (state.zoom === 'fit') k = Math.min(1, avail / s.w, availH / s.h);
+
+    ['A', 'B'].forEach(function (suf) {
+      var frame = document.getElementById('frame' + suf);
+      var f = document.getElementById(suf.toLowerCase());
+      f.style.width = s.w + 'px';
+      f.style.height = s.h + 'px';
+      f.style.transform = 'scale(' + k + ')';
+      frame.style.width = Math.round(s.w * k) + 'px';
+      frame.style.height = Math.round(s.h * k) + 'px';
+    });
+  }
+
+  function readRem() {
+    [['a', 'remA'], ['b', 'remB']].forEach(function (pair) {
+      var out = document.getElementById(pair[1]);
+      try {
+        var d = document.getElementById(pair[0]).contentDocument;
+        var v = d ? getComputedStyle(d.documentElement).fontSize : null;
+        out.innerHTML = v ? 'rem: <b>' + parseFloat(v).toFixed(1) + 'px</b>' : 'rem: –';
+      } catch (e) {
+        out.textContent = 'rem: (brak dostępu — odpal przez http://localhost)';
+      }
+    });
+  }
+
+  window.addEventListener('resize', apply);
+  setInterval(readRem, 500);
+  apply();
+</script>
+</body>
+</html>

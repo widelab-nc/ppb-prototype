@@ -1,0 +1,308 @@
+/* ============================================================
+   HOME — INSIGHTS · style SEKCJI (deliverable)
+   Ten plik jest samowystarczalny i przenośny: zero skalowania root font-size,
+   zero styli panelu strojenia. Wymaga tylko `--container-gutter` z warstwy
+   site-level (jest w `home-full/style.css`) i tokenów z `_shared/styleguide.css`.
+
+   Prototyp standalone: `style.css` (dokłada FLUID ROOT + panel strojenia).
+   Wpięcie w stronę:    linkuj TEN plik.
+   Figma: node 4473:4434, fileKey eamVOAaNZDwHQKofLeV2Il
+   Wymiary z Figmy (desktop 1440):
+     section 1440×1210 · padding 160 / 32
+     dekor   2 × 689|688 × 20, y=160, border 1px #D9D9D9, radius-top 10
+     heading "Insights" y=260 (is-h-l, deep green, wyśrodkowany)
+     karty   560×560, radius 16, gap 16, y=490, start x=32, bleed w prawo
+     karta   padding 32 · date→title gap 24 · title max-w 450
+     dół     media ⌀182 + shape 190 (hole ⌀182), gap 16, wyrównane w osi
+   Taby POMINIĘTE (decyzja Tomka) — zachowany oryginalny odstęp
+   heading→karty (150px), żeby po dołożeniu tabów geometria się zgadzała.
+
+   Mobile ≤767 — osobny artboard `4473:6648` (375×1448): BEZ slidera,
+   karty w kolumnie. Wymiary w bloku MOBILE na końcu pliku.
+
+   SKALOWANIE — model z `home-full` (decyzja Tomka 2026-07-24):
+   cały layout w `rem`, root font-size płynnie od viewportu (blok FLUID ROOT
+   niżej). Rozmiary NIE mają własnych @media — karta 35rem kurczy się sama
+   razem ze stroną; ręczne @media na `--card-w` dałoby PODWÓJNE skalowanie.
+   Jedyny @media na wymiarach to ≤767, bo tam zmienia się UKŁAD, nie skala.
+   Poziomy padding = `--container-gutter` (min 2rem = 32 z Figmy; globalny
+   `.section` też zjechał 48 → 32).
+   ⚠️ Brak artboardu TABLET (768–991) — tam jedzie proporcjonalnie pomniejszony
+      desktop ze sliderem. Do weryfikacji, jeśli tablet dostanie własny design.
+   ============================================================ */
+
+.section.is-home-insights {
+  /* 35rem = 560 z Figmy. min() to jedyny twardy limit: karta nie może być
+     szersza niż ekran minus gutter (ratuje bardzo wąskie ekrany). */
+  --card-w: min(35rem, calc(100vw - 2 * var(--container-gutter)));
+  --card-h: var(--card-w);  /* kwadrat jak w Figmie */
+  --card-pad:    2rem;      /* 32  */
+  --card-radius: 1rem;      /* 16  */
+  --row-gap:     1rem;      /* 16 — media ↔ kwadrat „More" */
+  --slide-gap:   1rem;      /* 16 — między kartami (JS: spaceBetween) */
+  --shape-size: 11.875rem;  /* 190 */
+  --media-size: 11.375rem;  /* 182 */
+  --media-object-w: 55%;    /* placeholder fiolki wewnątrz koła */
+  --decor-h:    1.25rem;    /* 20  */
+  --more-gap:   0.375rem;   /* 6   */
+  --arrow-size: 1.25rem;    /* 20  */
+  --title-gap:   1.5rem;    /* 24 — data → tytuł */
+  --title-max: 28.125rem;   /* 450 */
+  --edge: var(--container-gutter);  /* poziomy padding sekcji = start slidera */
+
+  padding: 10rem var(--edge);
+  background: var(--lab-white);
+  /* Karty wystające poza kontener przycina SEKCJA, nie slider.
+     `clip` a nie `hidden`: hidden robi scroll container i psuje sticky/ScrollTrigger.
+     Obie osie — w pionie i tak nic nie wychodzi, a jedna deklaracja jest
+     odporniejsza niż para x/y (mniej niespodzianek w kaskadzie Webflow). */
+  overflow: clip;
+}
+
+/* ---------- dekor: dwa panele z obrysem, przycięte ---------- */
+.home-insights_decor {
+  display: flex;
+  height: var(--decor-h);
+  pointer-events: none;
+}
+.home-insights_decor-panel {
+  flex: 1 1 50%;
+  border: 1px solid #D9D9D9;
+  border-bottom: 0;
+  /* radius = połowa wysokości (Figma: 20→10 desktop, 16→8 mobile) */
+  border-radius: calc(var(--decor-h) / 2) calc(var(--decor-h) / 2) 0 0;
+}
+.home-insights_decor-panel + .home-insights_decor-panel { margin-left: -1px; }
+
+/* ---------- nagłówek ---------- */
+.home-insights_head { margin-top: 5rem; }              /* 80 → tekst na y=260 */
+.home-insights_heading { text-align: center; }
+
+/* ============================================================
+   SLIDER
+   Siedzi W KONTENERZE (jak heading i dekor), więc obie krawędzie —
+   startowa lewa i skrajna prawa — pokrywają się z krawędziami kontenera.
+   Karty wystające poza kontener są widoczne i przycina je SEKCJA.
+   ============================================================ */
+.home-insights_slider {
+  margin-top: 9.375rem;                    /* 150 — odstęp z Figmy */
+  /* Box slidera = box `.container` (slider siedzi w kontenerze — patrz HTML).
+     Swiper liczy max translate z szerokości SWOJEGO boxa, więc przy skrajnym
+     przewinięciu prawa krawędź ostatniej karty = prawa krawędź kontenera.
+     Zero `slidesOffsetBefore/After` — geometrię daje sam kontener. */
+  overflow: visible;                       /* nadpisuje overflow:hidden z .swiper */
+  cursor: grab;
+  /* easing dosuwania po puszczeniu (snap) — wspólny easing projektu */
+  --swiper-wrapper-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.home-insights_slider.is-dragging { cursor: grabbing; }
+
+.home-insights_list { align-items: stretch; }
+
+/* ---------- karta ---------- */
+.home-insights_card {
+  width: var(--card-w);
+  height: var(--card-h);
+  flex-shrink: 0;
+  border-radius: var(--card-radius);
+  background: var(--card-bg, transparent);
+  border: 1px solid var(--card-stroke, transparent);
+  overflow: hidden;
+  color: var(--ink);
+}
+
+.home-insights_card-link {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: var(--card-pad);
+}
+
+/* warianty — TYLKO tu ustawiamy kolory; reszta CSS jedzie po zmiennych */
+.home-insights_card.is-light {
+  --ink: var(--deep-green);
+  --card-bg: var(--lab-white);
+  --card-stroke: rgba(0, 0, 0, 0.1);
+  --shape-fill: var(--light-green);
+  --shape-stroke: transparent;
+  --media-fill: transparent;
+}
+.home-insights_card.is-dark {
+  --ink: var(--lab-white);
+  --card-bg: linear-gradient(180deg, #033030 0%, #005453 30%, #548B94 100%);
+  --card-stroke: transparent;
+  --shape-fill: rgba(255, 255, 255, 0.10);
+  --shape-stroke: rgba(255, 255, 255, 0.22);
+  --media-fill: rgba(255, 255, 255, 0.08);
+}
+.home-insights_card.is-vibrant {
+  --ink: var(--lab-white);
+  --card-bg: var(--vibrant-green);
+  --card-stroke: transparent;
+  --shape-fill: rgba(255, 255, 255, 0.12);
+  --shape-stroke: rgba(255, 255, 255, 0.26);
+  --media-fill: rgba(255, 255, 255, 0.16);
+}
+
+/* ---------- góra karty: data + tytuł ---------- */
+.home-insights_date {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;                            /* 12 */
+  color: var(--ink);
+}
+.home-insights_date-dot {
+  width: 0.3125rem;                        /* 5 */
+  height: 0.3125rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.home-insights_title {
+  margin-top: var(--title-gap);
+  max-width: var(--title-max);
+  color: var(--ink);
+}
+
+/* ---------- dół karty: media + „More" ---------- */
+.home-insights_card-bottom {
+  display: flex;
+  align-items: center;
+  gap: var(--row-gap);
+}
+
+.home-insights_media {
+  width: var(--media-size);
+  height: var(--media-size);
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--media-fill);
+  overflow: hidden;
+  position: relative;
+  will-change: transform;
+}
+.home-insights_media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.home-insights_media-object {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--media-object-w);
+  height: auto;
+  display: block;
+}
+
+.home-insights_more {
+  width: var(--shape-size);
+  height: var(--shape-size);
+  flex-shrink: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  will-change: transform;
+}
+/* kształt = rounded-square minus koło (evenodd) — odpowiednik Subtract z Figmy */
+.home-insights_more-shape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.home-insights_more-shape path {
+  fill: var(--shape-fill);
+  stroke: var(--shape-stroke);
+  stroke-width: 1;
+}
+.home-insights_more-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--more-gap);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.home-insights_more-arrow {
+  width: var(--arrow-size);
+  height: var(--arrow-size);
+  flex-shrink: 0;
+}
+
+/* hover — delikatne dociągnięcie strzałki */
+.home-insights_card-link:hover .home-insights_more-arrow { transform: translateX(0.1875rem); }
+.home-insights_more-arrow { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* ============================================================
+   RESPONSYWNOŚĆ
+   Desktop + tablet (>767): BRAK @media na wymiarach. Wszystko w rem,
+   root font-size skaluje się z viewportem (blok FLUID ROOT na górze).
+   @media na `--card-w` dałoby PODWÓJNE skalowanie: raz rem, raz query.
+
+   ≤767 (mobile landscape + portrait): ZMIANA LAYOUTU, nie rozmiaru —
+   slider znika, karty układają się w kolumnę (decyzja Tomka + artboard
+   Figma `4473:6648`, 375px). To jest ten dozwolony przypadek @media:
+   inny układ, nie przeskalowany ten sam.
+   ============================================================ */
+
+/* ---------- MOBILE ≤767 — artboard Figma 4473:6648 (375 × 1448) ----------
+   Wymiary z Figmy (rem przy bazie 16):
+     section padding 80 / 20 / 80        dekor h=16, radius-top 8
+     dekor → heading 40                 heading → karty 98 (slot po tabach)
+     karta 100% × 355, radius 12, padding 20, gap między kartami 16
+     data → tytuł 12 (desktop 24)       tytuł bez max-width (294 = pełna szerokość)
+     dół: media ⌀138 + shape 144 (hole ⌀138), gap 12
+     „More" 18px + strzałka 18, gap 4.55
+   Uwaga: shape/media zachowują proporcję desktopu (144/190 = 138/182 = 0.7579),
+   więc ten sam SVG path skaluje się 1:1 — radius wychodzi 24×0.7579 = 18.2. */
+@media screen and (max-width: 767px) {
+  .section.is-home-insights {
+    --card-w: 100%;
+    --card-h: 22.1875rem;     /* 355 */
+    --card-pad: 1.25rem;      /* 20  */
+    --card-radius: 0.75rem;   /* 12  */
+    --row-gap: 0.75rem;       /* 12  */
+    --slide-gap: 1rem;        /* 16  */
+    --shape-size: 9rem;       /* 144 */
+    --media-size: 8.625rem;   /* 138 */
+    --media-object-w: 59%;
+    --decor-h: 1rem;          /* 16  */
+    --more-gap: 0.284rem;     /* 4.55 */
+    --arrow-size: 1.125rem;   /* 18  */
+    --title-gap: 0.75rem;     /* 12  */
+    --title-max: none;
+    --edge: 1.25rem;          /* 20 — Figma; kanon .section na mobile ma 16 */
+
+    padding-top: 5rem;        /* 80 */
+    padding-bottom: 5rem;     /* 80 */
+    overflow: visible;        /* nie ma czego przycinać — slider zniknął */
+  }
+
+  .home-insights_head { margin-top: 2.5rem; }   /* 40 */
+
+  /* slider → statyczny stos. Swiper jest niszczony w JS (destroy + cleanStyles),
+     ale zerujemy jeszcze jego resztki na wypadek braku JS. */
+  .home-insights_slider {
+    margin-top: 6.125rem;     /* 98 */
+    cursor: auto;
+  }
+  .home-insights_list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--slide-gap);
+    transform: none !important;
+  }
+  .home-insights_card {
+    width: 100%;
+    margin-right: 0 !important;   /* spaceBetween Swipera */
+  }
+  /* parallax wyłączony razem ze sliderem — zerujemy transformy */
+  .home-insights_card [data-lag] { transform: none !important; }
+}
+
+

@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<!-- Polpharma Biologics — sekcje homepage z Webflow (build Maćka), przeniesione do Vaulta.
+     Źródło: export Webflow (site polpharmaxwidehue). Zgrane ze wspólnym style guide.
+     Podgląd samodzielny; do złączenia z kanonicznym _code/home. Szczegóły: README.md -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Polpharma Biologics — Home (sekcje Webflow)</title>
+
+  <!-- KANON: typografia is-*, kolory, fonty, reset, .section/.container bazowe -->
+  <link rel="preload" href="../_shared/fonts/ConcretteM-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../_shared/fonts/SeasonSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../_shared/styleguide.css">
+
+  <!-- Swiper (sekcja „Meet the team") -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
+
+  <!-- Style sekcji z Webflow (tokeny + klasy how_/join_/pipeline_/meet_/...) -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="main-wrapper">
+      <section class="section is-dark is-100dvh">
+        <div class="w-layout-blockcontainer container w-container">
+          <div class="how-wrapper">
+            <div class="how_grid grid-custom">
+              <div class="how_grid_col1">
+                <div class="content_wrap">
+                  <div data-wf--eyebrow--variant="base" class="eyebrow-wrappper">
+                    <div class="eyebrow_dot"></div>
+                    <div class="eyebrow_text is-caption">how it works</div>
+                  </div>
+                  <h2 class="content_heading is-h-s">We cover the full biosimilar lifecycle</h2>
+                  <p class="content_p is-b-m is-text-o50">Momentum doesn&#x27;t stall at the transitions that matter most.</p><button id="" class="button-element">
+                    <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="base" class="primary-button">
+                      <div>Work with us</div>
+                    </div>
+                  </button>
+                </div>
+                <div class="how_grid_visual"><img src="images/how_image.png" loading="lazy" sizes="(max-width: 636px) 100vw, 636px" srcset="images/how_image-p-500.png 500w, images/how_image.png 636w" alt="" class="how_grid_img img-global"></div>
+              </div>
+              <div class="how_grid_col2">
+                <div class="display-none w-embed">
+                  <style>
+.how_category_dot_txt, .how_category_row_nb {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+</style>
+                </div>
+                <div class="how_category_wrapper">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">1</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m">Development</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Designed for scale from day one</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">GMP manufacturing built for compliance</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Tech transfer managed end-to-end</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.4</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Clinical strategy, study planning, execution &amp; reporting</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="how_category_wrapper">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">2</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m">Regulatory</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">2.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">One unified regulatory strategy</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">2.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Dossier build for global submission.</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">2.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Inspection readiness from the start</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="how_category_wrapper">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">3</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m">Commercial supply</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">3.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Supply continuity built into the program</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">3.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Launch planning across global markets</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">3.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Operational risk managed proactively</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="how_category_wrapper is-last">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">4</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m">Lifecycle management</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">4.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Post-approval changes handled in-house</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">4.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Label extensions and process updates</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">4.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Accountable long after launch</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section is-join">
+        <div class="w-layout-blockcontainer container is-grow w-container">
+          <div class="join_wrapper">
+            <div class="join_grid grid-custom">
+              <div class="join_grid_col1 grid-subgrid">
+                <div class="join_grid_col1_top">
+                  <div class="join_h2_wrapper">
+                    <h2 class="join_h2 is-h-m">Biosimilars don&#x27;t move themselves. <span class="span-no-wrap">People move</span> them. From molecule <span class="span-no-wrap">to end market.</span></h2>
+                  </div>
+                  <div class="join_p_wrapper">
+                    <p class="join_p is-b-m">If you are motivated by complex challenges and meaningful work, we invite you to join us.</p>
+                  </div><button id="" class="button-element">
+                    <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                      <div>View open positions</div>
+                    </div>
+                  </button>
+                </div>
+                <div id="w-node-b8783340-0810-d1f3-99c1-384959336ce2-906ca2f0" class="join_grid_col1_bottom">
+                  <div class="join_grid_col1_cta">
+                    <a href="#" class="elipse-cta w-inline-block"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 200 200" fill="none" stroke-width="1" class="elipse-cta_bg">
+                        <rect x="200" width="200" height="200" rx="96.0251" transform="rotate(90 200 0)" fill="currentColor"></rect>
+                      </svg>
+                      <div class="elipse-cta_txt is-t-s">Join us</div>
+                      <div class="elipse-cta_icon">
+                        <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                            <g clip-path="url(#clip0_4509_1233)">
+                              <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                            </g>
+                            <defs>
+                              <clippath id="clip0_4509_1233">
+                                <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                              </clippath>
+                            </defs>
+                          </svg></div>
+                      </div>
+                      <div class="elipse-cta_square"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="join_grid_col2">
+                <div class="join_grid_col2_divider"></div>
+                <div class="join_grid_visual"><img src="images/join_img.webp" loading="lazy" sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 900px" srcset="images/join_img-p-500.webp 500w, images/join_img-p-800.webp 800w, images/join_img.webp 900w" alt="" class="join_grid_visual_img img-global"></div>
+                <div>
+                  <p>Our people are at the heart  of our success.  <br><br>We bring together scientists, engineers, quality experts, and business professionals who share a commitment to excellence and patient impact.</p>
+                </div>
+              </div>
+              <div class="join_grid_cta-mobile">
+                <a href="#" class="elipse-cta w-inline-block"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 200 200" fill="none" stroke-width="1" class="elipse-cta_bg">
+                    <rect x="200" width="200" height="200" rx="96.0251" transform="rotate(90 200 0)" fill="currentColor"></rect>
+                  </svg>
+                  <div class="elipse-cta_txt is-t-s">Join us</div>
+                  <div class="elipse-cta_icon">
+                    <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                        <g clip-path="url(#clip0_4509_1233)">
+                          <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                        </g>
+                        <defs>
+                          <clippath id="clip0_4509_1233">
+                            <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                          </clippath>
+                        </defs>
+                      </svg></div>
+                  </div>
+                  <div class="elipse-cta_square"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                      <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                    </svg></div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section is-pipeline">
+        <div class="w-layout-blockcontainer container w-container">
+          <div class="pipeline_wrapper">
+            <div data-wf--header-centered-dividers--variant="base" class="header_wrapper">
+              <div class="display-none w-embed">
+                <style>
+  .header_divider + .header_divider {
+  margin-left: -1px;
+}
+</style>
+              </div>
+              <div class="header_dividers-top">
+                <div class="header_divider"></div>
+                <div class="header_divider"></div>
+              </div>
+              <div class="header_content">
+                <h2 class="header_heading is-h-l">Biosimilars pipeline</h2>
+                <p class="header_p is-t-s is-text-black button-element is-text-o50">Molecules that support long-term economic sustainability.</p>
+              </div>
+              <div class="header_dividers-bottom">
+                <div class="header_divider"></div>
+                <div class="header_divider"></div>
+              </div>
+            </div>
+            <div class="pipeline_table">
+              <div class="display-none w-embed">
+                <style>
+  /* Tablet: 768px–991px */
+  @media (min-width: 48rem) and (max-width: 61.9375rem) {
+    .pipeline_table_header_grid,
+    .pipeline_table_row {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.1fr)
+        minmax(0, 1.1fr)
+        minmax(0, 1fr)
+        minmax(0, 0.8fr)
+        minmax(0, 1fr)
+        minmax(7.5rem, auto);
+      align-items: center;
+      column-gap: 0.75rem;
+    }
+    .pipeline_table_header_grid > *,
+    .pipeline_table_row > * {
+      min-width: 0;
+    }
+    .pipeline_table_row > :last-child {
+      justify-self: end;
+      white-space: nowrap;
+    }
+  }
+  /* Desktop: od 992px */
+  @media (min-width: 62rem) {
+    .pipeline_table_header_grid,
+    .pipeline_table_row {
+      display: grid;
+      grid-template-columns:
+        minmax(11.25rem, 1.1fr)
+        minmax(11.25rem, 1.1fr)
+        minmax(11.25rem, 1fr)
+        minmax(8.75rem, 0.8fr)
+        minmax(11.25rem, 1fr)
+        minmax(9rem, auto);
+      align-items: center;
+      column-gap: 0.75rem;
+    }
+    .pipeline_table_row > :last-child {
+      justify-self: end;
+      white-space: nowrap;
+    }
+  }
+</style>
+              </div>
+              <div class="pipeline_table_header">
+                <div class="pipeline_table_header_grid">
+                  <div class="pipeline_table_header_cell is-1">
+                    <div class="pipeline_table_header_cell_txt is-caption">Program</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Reference drug</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Therapeutic area</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Status</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Partner</div>
+                  </div>
+                </div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Ranibizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Lucentis® (Novartis)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Ophthalmology</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">Commercialized</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Teva, Zydus</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Natalizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Tysabri® (Biogen)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Multiple sclerosis</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">Commercialized</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Sandoz</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Vedolizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Lucentis® (Novartis)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Ophthalmology</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">Commercialized</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Teva, Zydus</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Ocrelizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Tysabri® (Biogen)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Multiple sclerosis</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">In development</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Sandoz</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Guselkumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Tysabri® (Biogen)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Multiple sclerosis</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">In development</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Sandoz</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+            </div>
+            <div class="pipeline_logos_wrapper">
+              <div class="display-none w-embed">
+                <style>
+  .pipeline_table_row .pipeline_logo_wrap + .pipeline_logo_wrap {
+    margin-left: -1px;
+  }
+</style>
+              </div>
+              <div class="pipeline_logos_label is-caption">trusted worldwide</div>
+              <div class="pipeline_logos_grid">
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="images/logo_libbs.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="images/logo_sandoz.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="images/logo_ms-pharma.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="images/logo_fresenius.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="images/logo_tuteur.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="images/logo_teva.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section is-padding-off">
+        <div class="w-layout-blockcontainer container w-container">
+          <div class="meet_wrapper">
+            <div data-wf--header-1--variant="base" class="header-1_wrapper">
+              <h2 class="header-1_heading is-h-m">Meet the team of experts<br>behind every program</h2>
+              <div class="header-1_p_wrapper">
+                <p class="header-1_p is-t-s is-text-o50 is-text-black">Deep expertise. Lean by intention.</p>
+              </div>
+              <div class="header-1_btn_wrapper"></div>
+            </div>
+            <div class="meet_swiper">
+              <div data-swiper-autoplay-disable-on-interaction="false" data-swiper-slides-landscape="2" class="swiper_wrap" data-swiper-slides-desktop="4" data-swiper-gap="var(--_grid---grid-gap)" data-swiper-centered="true" data-swiper-drag="true" data-swiper-autoplay-reverse="false" data-swiper-autoplay-delay="3000" data-swiper-rewind="false" data-swiper-autoplay-pause-on-mouse-enter="true" data-swiper-designer-fallback="true" data-swiper-autoplay="true" data-swiper-speed="1800" data-swiper-designer-width="25" data-swiper-loop="true" data-swiper-keyboard="true" data-swiper-slides-mobile="1.25" data-swiper-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-swiper-slides-tablet="2">
+                <div class="swiper_layout">
+                  <div class="swiper_component swiper">
+                    <div class="swiper_list swiper-wrapper">
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="images/meet_paco.webp" alt="" sizes="100vw" srcset="images/meet_paco-p-500.webp 500w, images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="images/meet_paco.webp" alt="" sizes="100vw" srcset="images/meet_paco-p-500.webp 500w, images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="images/meet_paco.webp" alt="" sizes="100vw" srcset="images/meet_paco-p-500.webp 500w, images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="images/meet_paco.webp" alt="" sizes="100vw" srcset="images/meet_paco-p-500.webp 500w, images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="images/meet_paco.webp" alt="" sizes="100vw" srcset="images/meet_paco-p-500.webp 500w, images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper_pagination">
+                    <div id="" class="swiper_pagination_dot is-active"></div><button id="" class="swiper_pagination_dot"></button>
+                  </div>
+                </div>
+                <div class="swiper_hidden display-none"><button class="swiper_button_wrap is-disabled"></button><button class="swiper_button_wrap is-locked"></button>
+                  <div class="swiper_component is-dragging"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  </main>
+
+  <!-- Swiper init dla „Meet the team" (na żywo robi to custom skrypt Webflow czytający data-swiper-*; tu minimalny odpowiednik) -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+  <script>
+    document.querySelectorAll('.meet_swiper .swiper').forEach(function(el){
+      new Swiper(el, {
+        slidesPerView: 1.25, spaceBetween: 20, centeredSlides: true, loop: true,
+        speed: 1800, autoplay: { delay: 3000, pauseOnMouseEnter: true },
+        breakpoints: { 768: { slidesPerView: 2, centeredSlides: false }, 992: { slidesPerView: 4, centeredSlides: false } },
+        pagination: { el: el.closest('.swiper_wrap').querySelector('.swiper_pagination'), clickable: true, bulletClass: 'swiper_pagination_dot', bulletActiveClass: 'is-active' }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Polpharma Biologics — prototype review</title>
+<style>
+  :root{ --deep:#005453; --mist:#E6EFEF; --vib:#16ABA9; --red:#F55D5D; --line:#cfe0df; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--mist);color:var(--deep);
+       font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+       padding:56px 28px 80px;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:60rem}
+  h1{font-size:1.6rem;font-weight:600;letter-spacing:-.01em}
+  .sub{opacity:.6;margin-top:6px;font-size:.9rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:14px;margin-top:32px}
+  a.card{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;
+         padding:20px 22px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+  a.card:hover{border-color:var(--vib);transform:translateY(-2px)}
+  a.card .t{font-weight:600;font-size:1.05rem}
+  a.card .d{opacity:.65;font-size:.86rem;margin-top:6px;line-height:1.45}
+  .tag{display:inline-block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;
+       background:var(--mist);border-radius:99px;padding:3px 9px;margin-top:12px;opacity:.75}
+  h2{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;opacity:.55;margin:40px 0 12px;font-weight:600}
+  ul{list-style:none;font-size:.9rem}
+  li{padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:baseline}
+  li b{font-weight:600}
+  li span{opacity:.7}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--red);flex:0 0 auto;transform:translateY(-2px)}
+  .note{margin-top:34px;font-size:.84rem;opacity:.62;line-height:1.6;border-left:2px solid var(--line);padding-left:14px}
+  code{background:#fff;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:.85em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Polpharma Biologics — prototype review</h1>
+  <p class="sub">Statyczny prototyp homepage. Kod źródłowy przed portem do Webflow.</p>
+
+  <div class="grid">
+    <a class="card" href="home-full/index.html">
+      <div class="t">Homepage — pełna</div>
+      <div class="d">Cała strona: loader → hero → how it works → we know → key pillars → concept → sekcje Webflow → insights → CTA → footer.</div>
+      <div class="tag">home-full</div>
+    </a>
+    <a class="card" href="home-part1/index.html">
+      <div class="t">Homepage — wycinek + mobile</div>
+      <div class="d">Hero → pinned flow → apla. Pełna warstwa mobile (≤767) i smooth scroll (Lenis). Poligon pod port.</div>
+      <div class="tag">home-part1</div>
+    </a>
+    <a class="card" href="_responsive-check.html">
+      <div class="t">Kontrola responsywności</div>
+      <div class="d">Obie wersje w podglądzie, przełącznik siedmiu rozmiarów okna, live odczyt skali strony.</div>
+      <div class="tag">narzędzie</div>
+    </a>
+  </div>
+
+  <h2>Co jest nowego w tej wersji</h2>
+  <ul>
+    <li><span class="dot"></span><div><b>Skalowanie od wysokości okna.</b> <span>Strona skalowała się wyłącznie od szerokości — na oknach szerokich i niskich kształt z dołu zasłaniał nagłówek „Your pure-play…". Skala ma teraz sufit wyprowadzony z wysokości.</span></div></li>
+    <li><span class="dot"></span><div><b>We-know trzyma kontener.</b> <span>Kolumna tekstu i kształt były przypięte do krawędzi ekranu, nie do kontenera — na szerokich monitorach kompozycja się rozjeżdżała.</span></div></li>
+    <li><span class="dot"></span><div><b>Highlight tekstu.</b> <span>Akapit „that most biosimilar programs…" doświetla się scrollem wyraz po wyrazie (wspólny system, ten sam co w track-record).</span></div></li>
+    <li><span class="dot"></span><div><b>Warstwa mobile</b> <span>(w wycinku): 375×676 1:1 z artboardu, trzytaktowa choreografia, wideo dojeżdżające do kształtu.</span></div></li>
+  </ul>
+
+  <h2>Na co patrzeć</h2>
+  <ul>
+    <li><b>1440×800</b><span>artboard — punkt odniesienia, ma wyglądać dokładnie jak w Figmie</span></li>
+    <li><b>1920×1080</b><span>typowy laptop — bez zmian względem poprzedniej wersji</span></li>
+    <li><b>1920×800 · 2300×830 · 2560×900</b><span>szerokie i niskie — tu wcześniej kształt wchodził na tekst</span></li>
+    <li><b>1440×660</b><span>niskie okno — całość kurczy się proporcjonalnie</span></li>
+  </ul>
+
+  <p class="note">
+    Fonty: <b>Season Sans Regular 400 i Bold 700</b> nie są jeszcze wgrane — body renderuje się na Medium,
+    a wyróżnienia są faux-bold. Sekcje poniżej „We know" nie mają jeszcze warstwy mobile.
+    Wideo są placeholderami. Podgląd <code>home-full</code> ładuje GSAP i Swiper z CDN, więc wymaga internetu.
+  </p>
+
+</div>
+</body>
+</html>

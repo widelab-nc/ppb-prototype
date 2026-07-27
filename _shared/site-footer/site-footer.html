@@ -1,0 +1,83 @@
+<!-- ============================================================
+     PARTIAL: SITE FOOTER (globalny — wszystkie strony)
+     Figma: desktop 4572:7327 · mobile 4677:8902
+     (file „Polpharma Biologics - Webflow Starter", eamVOAaNZDwHQKofLeV2Il)
+
+     Wklej ten blok na końcu <main>/<body> strony.
+     Wymaga: ../styleguide.css + site-footer.css
+             ../gsap-config.js + ../reveal.js + site-footer.js
+     Init:   initSiteFooter();
+     ============================================================ -->
+
+<footer class="section is-site-footer">
+  <div class="container">
+    <div class="site-footer_component">
+
+      <!-- ---------- KSZTAŁTY (brand mark: koło + kwadrat z wyciętym kołem) ----------
+           Desktop: kwadrat po lewej, koło po prawej (kolejność DOM).
+           Mobile: odwrócone (row-reverse) — koło przy krawędzi, kwadrat obok.
+           Na scroll rozjeżdżają się ze stanu koncentrycznego do docelowego. -->
+      <div class="site-footer_shapes" aria-hidden="true">
+        <svg class="site-footer_square" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- pierścień (kwadrat − koło), fill-rule evenodd -->
+          <path class="site-footer_shape-fill" fill-rule="evenodd"
+            d="M18.333 0 H201.667 A18.333 18.333 0 0 1 220 18.333 V201.667 A18.333 18.333 0 0 1 201.667 220 H18.333 A18.333 18.333 0 0 1 0 201.667 V18.333 A18.333 18.333 0 0 1 18.333 0 Z
+               M110 5 a105 105 0 1 0 0 210 a105 105 0 1 0 0 -210 Z" />
+          <rect x="0.5" y="0.5" width="219" height="219" rx="18.333" class="site-footer_shape-stroke" />
+          <circle cx="110" cy="110" r="105" class="site-footer_shape-stroke" />
+        </svg>
+        <div class="site-footer_circle"></div>
+      </div>
+
+      <!-- ---------- KOLUMNA TREŚCI ---------- -->
+      <div class="site-footer_col">
+
+        <!-- Headquaters -->
+        <div class="site-footer_hq">
+          <p class="is-t-s site-footer_hq-title" data-reveal="site-footer">Headquaters</p>
+          <!-- ⚠️ is-text-o50 MUSI siedzieć na RODZICU, nie na elemencie z data-reveal:
+               revealText() ustawia inline autoAlpha=1, które skasowałoby opacity 0.5 -->
+          <address class="is-text-o50 site-footer_hq-address">
+            <p class="is-b-m" data-reveal="site-footer">
+              Polpharma Biologics International AG,<br />
+              Erlenring 2, 6343 Rotkreuz, Switzerland<br />
+              <a href="mailto:office@polpharmabiologics.com">office@polpharmabiologics.com</a>
+            </p>
+          </address>
+        </div>
+
+        <!-- nawias górny -->
+        <div class="site-footer_rule" data-rule-reveal aria-hidden="true"></div>
+
+        <!-- nawigacja -->
+        <nav class="site-footer_nav" aria-label="Footer">
+          <ul class="site-footer_links">
+            <li><a class="is-t-s site-footer_link" href="/about-us"      data-reveal="site-footer">About us</a></li>
+            <li><a class="is-t-s site-footer_link" href="/what-we-do"    data-reveal="site-footer">What we do</a></li>
+            <li><a class="is-t-s site-footer_link" href="/partnerships"  data-reveal="site-footer">Partnerships</a></li>
+            <li><a class="is-t-s site-footer_link" href="/insights"      data-reveal="site-footer">Insights</a></li>
+            <li><a class="is-t-s site-footer_link" href="/careers"       data-reveal="site-footer">Careers</a></li>
+          </ul>
+          <!-- is-text-o50 na <li> (rodzic) — patrz uwaga przy adresie -->
+          <ul class="site-footer_legal">
+            <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="#"               data-reveal="site-footer">Cookie center</a></li>
+            <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="/terms-of-use"   data-reveal="site-footer">Terms of use</a></li>
+            <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="/imprint"        data-reveal="site-footer">Imprint</a></li>
+            <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="/privacy-policy" data-reveal="site-footer">Privacy policy</a></li>
+          </ul>
+        </nav>
+
+        <!-- nawias dolny + stopka prawna (dosuwane do dołu) -->
+        <div class="site-footer_bottom">
+          <div class="site-footer_rule is-flipped" data-rule-reveal aria-hidden="true"></div>
+          <!-- is-text-o50 na wierszu (rodzic) — patrz uwaga przy adresie -->
+          <div class="is-text-o50 site-footer_meta">
+            <p class="is-b-m site-footer_meta-item" data-reveal="site-footer">© Polpharma Biologics<span class="site-footer_rights">. All rights reserved.</span></p>
+            <p class="is-b-m site-footer_meta-item" data-reveal="site-footer">Made by Widelab</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</footer>

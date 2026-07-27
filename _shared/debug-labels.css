@@ -1,0 +1,66 @@
+/* ============================================================
+   Polpharma Biologics — DEBUG LABELS (_shared, globalne, opt-in)
+   Narzędzie deweloperskie: pokazuje nazwę elementu w jego LEWYM DOLNYM
+   rogu + toggle (prawy dolny róg ekranu) pokazujący/chowający wszystkie.
+
+   Użycie: dodaj `data-label="nazwa"` na elemencie, wepnij ten CSS + JS
+   (`debug-labels.js`). Reszta dzieje się sama. NIE trafia do produkcji
+   (tylko prototypy / dev).
+   ============================================================ */
+
+/* plakietka z nazwą — lewy dolny róg elementu (element dostaje position:relative z JS, jeśli był static) */
+.dbg-label {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 9998;
+  padding: 2px 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 4px 0 0;
+  white-space: nowrap;
+  pointer-events: none;          /* nie blokuje klików w element */
+  text-transform: none;
+}
+
+/* stan schowany — klasa na <html> (steruje toggle) */
+.dbg-hidden .dbg-label { display: none; }
+
+/* toggle — prawy dolny róg ekranu (ponad ewentualnym CTA bottom-right) */
+.dbg-toggle {
+  position: fixed;
+  right: 2rem;
+  bottom: 5.5rem;                /* ponad get-in-touch (bottom 2rem) — przesuń, jeśli kolizja */
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #16ABA9;           /* Vibrant Green */
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.dbg-toggle:hover { filter: brightness(1.08); }
+.dbg-toggle::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #C6ECEB;           /* kropka stanu — jasna gdy widoczne */
+}
+.dbg-hidden .dbg-toggle::before { background: rgba(255, 255, 255, 0.35); }
