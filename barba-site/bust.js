@@ -9,8 +9,8 @@ const fs = require("fs");
 const d = new Date();
 const p = (n) => String(n).padStart(2, "0");
 const V = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
-const LOCAL = ["style.css", "about.css", "root-scale.css", "script.js", "about.js", "nav-v2.js", "key-pillars.js",
-               "insights.js", "meet-swiper.js", "transition.js", "smooth-lenis.js", "loader-01d.js", "nav-shape.js"];
+const LOCAL = ["style.css", "about.css", "root-scale.css", "track-record.css", "script.js", "about.js", "nav-v2.js",
+               "key-pillars.js", "insights.js", "meet-swiper.js", "transition.js", "smooth-lenis.js", "loader-01d.js", "nav-shape.js"];
 for (const f of ["index.html", "about.html"]) {
   let s = fs.readFileSync(f, "utf8"), n = 0;
   for (const file of LOCAL) {

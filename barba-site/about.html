@@ -17,11 +17,14 @@
        Root font-size (drabinka fluid) + --container-gutter + padding nava.
        Musi przeżyć podmianę arkuszy stron, inaczej nav (site-level, w rem)
        zmienia rozmiar w połowie przejścia. Szczegóły w root-scale.css. -->
-  <link rel="stylesheet" href="root-scale.css?v=20260729-081453" />
+  <link rel="stylesheet" href="root-scale.css?v=20260729-085459" />
 
   <!-- warstwa STRONY — transition.js podmienia ją pod zasłoną wipe'a -->
-  <link rel="stylesheet" href="../track-record/style.css" data-page-css />   <!-- sekcja timeline (na razie na dole) -->
-  <link rel="stylesheet" href="about.css?v=20260729-081453" data-page-css />
+  <!-- LOKALNA kopia arkusza track-record BEZ bloku FLUID ROOT (audyt 2026-07-29):
+       oryginał niesie własną drabinkę rem bez sufitu → nav skakał przy przejściu.
+       Szczegóły w komentarzu na górze track-record.css. -->
+  <link rel="stylesheet" href="track-record.css?v=20260729-085459" data-page-css />   <!-- sekcja timeline (na razie na dole) -->
+  <link rel="stylesheet" href="about.css?v=20260729-085459" data-page-css />
 
   <!-- BUG FIX 2026-07-28 (a) — patrz index.html: w <head>, nie na dole <body>,
        bo przeglądarka przywraca scroll przed dojściem do skryptów końcowych -->
@@ -373,7 +376,7 @@
   <script src="../_shared/swap.js"></script>   <!-- system #3: swap-in-place (po reveal.js) -->
   <!-- NAV v2: klon maski + arbiter motywu; PRZED nav-shape/nav-menu.
        About jedzie teraz na tym samym arbitrze co home (był własny initNavMask). -->
-  <script src="nav-v2.js?v=20260729-081453"></script>
+  <script src="nav-v2.js?v=20260729-085459"></script>
   <!-- generator kształtu navbara (komponent, obie instancje: dark + light w masce) -->
   <script src="../_shared/nav/nav-shape.js"></script>
   <script src="../_shared/nav/nav-menu.js"></script>
@@ -390,14 +393,14 @@
        dopiero w init(). Parytetu list pilnuje verify.js, sekcja 4e.
        ============================================================ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-  <script src="loader-01d.js?v=20260729-081453"></script>
-  <script src="script.js?v=20260729-081453"></script>
+  <script src="loader-01d.js?v=20260729-085459"></script>
+  <script src="script.js?v=20260729-085459"></script>
   <script src="../_shared/video-scrub.js"></script>
-  <script src="key-pillars.js?v=20260729-081453"></script>
+  <script src="key-pillars.js?v=20260729-085459"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
-  <script src="meet-swiper.js?v=20260729-081453"></script>
-  <script src="insights.js?v=20260729-081453"></script>
-  <script src="about.js?v=20260729-081453"></script>
+  <script src="meet-swiper.js?v=20260729-085459"></script>
+  <script src="insights.js?v=20260729-085459"></script>
+  <script src="about.js?v=20260729-085459"></script>
   <!-- sekcja timeline (track-record) — ma już kontrakt PPB.pages.trackRecord;
        pod harnessem NIE bootuje się sama, wywołuje ją about.js -->
   <script src="../track-record/script.js"></script>
@@ -408,7 +411,7 @@
        ============================================================ -->
   <script src="vendor/lenis.min.js"></script>
   <script src="vendor/barba.umd.js"></script>
-  <script src="smooth-lenis.js?v=20260729-081453"></script>
-  <script src="transition.js?v=20260729-081453"></script>
+  <script src="smooth-lenis.js?v=20260729-085459"></script>
+  <script src="transition.js?v=20260729-085459"></script>
 </body>
 </html>

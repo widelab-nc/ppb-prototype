@@ -1,0 +1,206 @@
+/* ============================================================
+   Polpharma Biologics — Track record (custom sekcji)
+   NAMESPACE ONLY: track-record_*  ·  zero redefinicji is-* / resetu /
+   @font-face — to żyje w ../_shared/styleguide.css.
+   Wymiary 1:1 z Figmy (node 4941:2584 / 4941:2662), px/16 → rem.
+
+   ZASADA (Tomek 2026-07-27): ŻADNYCH combo klas na typografii.
+   Element z klasą `is-*` nie dostaje własnych marginesów / max-width —
+   odstępy i szerokości niosą wrappery layoutowe (`_entry`, `_headline`,
+   `_dates`) przez flex + gap. Dzięki temu w Webflow klasy typograficzne
+   zostają czyste, bez comboksów per sekcja.
+
+   SKALOWANIE (kanon 2026-07-24, `class-structure-and-naming.md` §Skalowanie):
+   sekcja NIE ma własnych breakpointów na WYMIARY. Cały layout w `rem`,
+   root font-size skaluje się płynnie (blok FLUID ROOT niżej, 1:1 z
+   `home-full` / `home-insights`). Poziomy padding = `--container-gutter`.
+   Twarde limity typu `min(28.125rem, 82vw)` są dozwolone (patrz kanon:
+   „min(35rem, calc(100vw − 2×gutter))") — i to one obsługują mobile,
+   bez ani jednego @media na wymiarach.
+
+   BEZ ZAOKRĄGLEŃ: w designie zdjęcia nie mają radiusa (decyzja Tomka
+   2026-07-27). Jedyne okrągłe rzeczy to koło pod fiolkami (rysowane w CSS,
+   nie asset) i kropka w dacie — obie są kołami z założenia, nie „cornerem".
+   ============================================================ */
+
+/* ============================================================
+   FLUID ROOT — WYCIĘTY (audyt 2026-07-29, zgłoszenie Tomka: „zmiana szerokości
+   navbaru przy wejściu na about").
+   Oryginał (../track-record/style.css) niesie WŁASNĄ kopię drabinki rem:
+   `html{font-size: calc(...)}` BEZ sufitu --rem-cap + własny --container-gutter
+   + INNE pasmo ≤991 (14→11 zamiast 16→19). Jako arkusz STRONY (data-page-css)
+   wpinany jest na koniec <head>, czyli PO root-scale.css — i wygrywał kaskadę.
+   Pomiar @1920×800: home rem 16 (sufit 2%vh) → about rem 19,21; padding nava
+   272 → 134 px. To ta sama klasa buga co changelog 54A, tylko w innym pliku;
+   pilnuje jej teraz verify.js 4d (żaden arkusz data-page-css nie może ustawiać
+   html{} / --container-gutter / paddingu .nav_component).
+   Skalę serwisu definiuje WYŁĄCZNIE root-scale.css (warstwa trwała).
+   ⚠️ Ten plik to KOPIA ../track-record/style.css minus blok roota — dług jak
+   insights.js; przy zmianie kanonu przegenerować.
+   ============================================================ */
+
+/* ============================================================
+   SEKCJA
+   Struktura scrolla (patrz script.js):
+     [intro heading — przewija się normalnie i znika u góry]
+     [_sticky  = wrapper dający DŁUGOŚĆ scrolla]
+       [_band  = position: sticky, max 614 wys., wyśrodkowane w pionie]
+         [_track = jedzie w lewo W CAŁOŚCI — razem z kolumną tekstu]
+   ============================================================ */
+.section.is-track-record {
+  /* Wysokość PASMA — JEDNO źródło prawdy (czyta ją też padding-bottom niżej). */
+  --tr-band-h: min(38.375rem, calc(100vh - 15rem));   /* 614 max */
+  /* Luz nad/pod pasmem po przyklejeniu = (100vh − pasmo) / 2. */
+  --tr-band-gap: calc((100vh - var(--tr-band-h)) / 2);
+
+  /* ⚠️ padding-bottom = --tr-band-gap, NIE zero.
+     Wrapper kończy się na DOLNEJ krawędzi pasma, a pasmo kończy się
+     --tr-band-gap nad dołem ekranu (jest wyśrodkowane). Bez tego paddingu
+     następna sekcja wjeżdża od dołu jeszcze W TRAKCIE przyklejenia.
+     Z paddingiem dolna krawędź sekcji dojeżdża do dołu ekranu dokładnie
+     w momencie odklejenia. */
+  padding: 7.5rem var(--container-gutter) var(--tr-band-gap);
+  background-color: var(--light-green);
+
+  /* ⚠️ PRZYCINANIE JEST TUTAJ, na SEKCJI — nie na kontenerze (zmiana 2026-07-27,
+     decyzja Tomka). Dzięki temu tor „ucieka" do KRAWĘDZI EKRANU, a nie do
+     krawędzi contentu: overflow przycina na padding-boxie, więc peek wchodzi
+     w gutter i wyjeżdża poza ekran, zamiast być ucinany na 32 px od brzegu.
+
+     MUSI to być `clip`, NIE `hidden`: `hidden` robi z elementu kontener
+     przewijania, więc `position: sticky` na potomku zaczyna się przyklejać
+     względem NIEGO (a on się nie przewija) = sticky przestaje działać.
+     `overflow: clip` przycina BEZ tworzenia kontenera przewijania, więc
+     kontenerem dla sticky zostaje viewport i wszystko gra. */
+  overflow: clip;
+}
+
+/* --- intro heading (przewija się normalnie, znika u góry przed przyklejeniem) ---
+   margin-bottom = STAŁY odstęp intro → pasmo (60 z Figmy), niezależny od
+   wysokości ekranu. To jedyny wyjątek od „zero stylów na typografii":
+   odstęp musi siedzieć tu, bo `_sticky` jest wysoki na całą długość scrolla,
+   więc jego własny margines byłby liczony w złym miejscu. */
+.track-record_intro { max-width: 57.5rem; margin-bottom: 3.75rem; }  /* 919 / 60 */
+
+/* --- wrapper: DŁUGOŚĆ scrolla sekcji ---
+   --tr-scroll ustawia JS (zależy od zmierzonej szerokości toru). */
+.track-record_sticky {
+  height: calc(var(--tr-band-h) + var(--tr-scroll, 0px));
+}
+
+/* --- PASMO: przykleja się wyśrodkowane; okno dla toru --- */
+.track-record_band {
+  position: sticky;            /* natywne przyklejanie — zero JS w tym momencie */
+  top: var(--tr-band-gap);     /* luz = (100vh − pasmo)/2 → wyśrodkowane w pionie */
+  height: var(--tr-band-h);
+  /* BEZ overflow — przycina sekcja (patrz wyżej), żeby tor bleedował
+     do krawędzi ekranu, a nie do krawędzi contentu. */
+}
+
+/* --- TOR: cała zawartość (tekst + karty) jedzie w lewo razem --- */
+.track-record_track {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  will-change: transform;
+}
+
+/* ============================================================
+   KOLUMNY TORU
+   Wszystkie (łącznie z kolumną tekstu) to `_col` — jeden rytm, jeden
+   dywizor między sąsiadami. `min(…, 82vw)` = twardy limit na wąskie
+   ekrany: na mobile kolumna nigdy nie jest szersza niż ekran i widać
+   peek następnej. Zero @media.
+   ============================================================ */
+.track-record_col {
+  position: relative;               /* kotwica dla rosnącego dywizora */
+  flex: 0 0 min(28.125rem, 82vw);   /* 450 */
+  padding-left: 2rem;               /* 32 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  min-height: 0;
+}
+/* DYWIZOR = pseudo-element, nie border — bo ROŚNIE z góry do dołu przy
+   wejściu sekcji w kadr (skala Y 0→1, origin: top), w rytmie i easingu
+   globalnego reveala (PPB.config.reveal). Patrz script.js → growDividers. */
+.track-record_col + .track-record_col { --tr-div: 0; }   /* 0→1 animuje JS */
+.track-record_col + .track-record_col::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0;
+  width: 1px; height: 100%;
+  background: var(--dark-stroke);
+  transform: scaleY(var(--tr-div));
+  transform-origin: top center;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .track-record_col + .track-record_col { --tr-div: 1; }
+}
+.track-record_col[data-wide] { flex-basis: min(28.75rem, 82vw); }        /* 460 (ostatnia) */
+.track-record_col[data-col="lead"] {
+  flex-basis: min(27.5rem, 82vw);   /* 440 */
+  padding-left: 0;                  /* pierwsza kolumna siedzi na gutterze sekcji */
+  padding-right: 2rem;
+}
+
+/* kolumna tekstu: szerokość miary trzyma wrapper, NIE element z `is-t-l` */
+.track-record_headline { max-width: 22.5rem; }   /* 360 */
+/* ⚠️ Kolorowanie tekstu NIE jest już lokalne — to system globalny #4
+   (`data-highlight` + _shared/highlight.js). Zero klas i stanów w tym pliku;
+   stan początkowy `.hl-unit` siedzi w _shared/styleguide.css. */
+.track-record_diamond { width: 3rem; height: 3rem; color: var(--vibrant-green); flex: 0 0 auto; }  /* 48 */
+.track-record_diamond svg { width: 100%; height: 100%; display: block; }
+
+/* ============================================================
+   TREŚĆ KARTY — odstępy przez flex + gap na wrapperach.
+   Element z `is-caption` / `is-b-s` NIE dostaje żadnego stylu.
+   ============================================================ */
+.track-record_entry {
+  display: flex;
+  flex-direction: column;
+  gap: 1.375rem;                    /* 22 — było margin-top na is-b-s */
+}
+.track-record_entry[data-narrow] { max-width: 17.5rem; }   /* 280 (karta 1) */
+
+.track-record_dates { display: flex; align-items: center; gap: 0.75rem; }
+.track-record_dates-dot {
+  width: 0.3125rem; height: 0.3125rem;   /* 5 */
+  border-radius: 50%;                    /* kropka = koło z założenia */
+  background: var(--deep-green);
+  flex: 0 0 auto;
+}
+
+/* ============================================================
+   MEDIA — zdjęcia klienta, BEZ radiusa (decyzja Tomka 2026-07-27)
+   ============================================================ */
+.track-record_media {
+  overflow: hidden;
+  flex: 0 0 auto;
+  margin: 0;                        /* <figure> ma domyślny margin */
+}
+.track-record_media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.track-record_media[data-media="petri"] { width: 19.625rem; height: 19.625rem; }  /* 314 */
+.track-record_media[data-media="water"] { width: 11.25rem;  height: 11.25rem;  }  /* 180 */
+
+/* karta 2: koło rysowane W CSS (nie asset) + fiolki 3D (PNG z alfą) w środku */
+.track-record_circle {
+  width: 19.625rem; height: 19.625rem;   /* 314 */
+  border-radius: 50%;
+  border: 1px solid var(--dark-stroke);
+  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 auto;
+}
+.track-record_vials {
+  width: 14.0625rem; height: 14.0625rem;  /* 225 */
+  object-fit: contain;
+  display: block;
+}
+
+/* ⚠️ ŚWIADOMIE ZERO @media na wymiarach — patrz nagłówek pliku.
+   Mobile obsługują twarde limity `min(…rem, 82vw)` na kolumnach: tor jedzie
+   tą samą choreografią, tylko dystans jest dłuższy, a kolumny mieszczą się
+   na ekranie z peekiem następnej. Media query wolno tu dołożyć TYLKO na
+   zmianę LAYOUTU (np. tor → pionowy stack), nigdy na rozmiary. */

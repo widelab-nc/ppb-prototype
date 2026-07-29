@@ -133,13 +133,27 @@ console.log("\n== 4d. warstwa trwała ==");
     ? ok("obie strony mają IDENTYCZNĄ warstwę trwałą CSS")
     : bad(`warstwa trwała się rozjeżdża:\n     home : ${persist["index.html"]}\n     about: ${persist["about.html"]}`);
 
-  const st = fs.readFileSync("style.css", "utf8");
-  /^html\s*{/m.test(st)
-    ? bad("style.css (arkusz STRONY) ustawia html{} — root font-size zniknie na about")
-    : ok("style.css nie ustawia root font-size");
-  /^\.nav_component\s*{\s*padding/m.test(st)
-    ? bad("style.css (arkusz STRONY) stylizuje .nav_component — nav zmieni się na about")
-    : ok("style.css nie stylizuje nava");
+  /* ROZSZERZONE (audyt 2026-07-29, „zmiana szerokości navbaru na about"):
+     kontrola WSZYSTKICH arkuszy data-page-css, nie tylko style.css.
+     `../track-record/style.css` niósł własną drabinkę rem BEZ sufitu --rem-cap
+     i wygrywał kaskadę (page CSS wpinany na koniec <head>, PO root-scale.css).
+     Pomiar @1920×800: home rem 16 → about 19,21, padding nava 272 → 134 px. */
+  const pageCssFiles = new Set();
+  for (const page of ["index.html", "about.html"]) {
+    const h = fs.readFileSync(page, "utf8");
+    for (const m of h.matchAll(/<link rel="stylesheet" href="([^"?]+)[^"]*"[^>]*data-page-css/g)) pageCssFiles.add(m[1]);
+  }
+  for (const css of pageCssFiles) {
+    if (!fs.existsSync(css)) { bad(`${css} (data-page-css) nie istnieje`); continue; }
+    const s = fs.readFileSync(css, "utf8");
+    const grzechy = [];
+    if (/^html\s*{/m.test(s)) grzechy.push("html{} (root font-size)");
+    if (/^\s*--container-gutter\s*:/m.test(s)) grzechy.push("--container-gutter");
+    if (/^\.nav_component\s*{\s*padding/m.test(s)) grzechy.push(".nav_component{padding}");
+    grzechy.length
+      ? bad(`${css} (arkusz STRONY) niesie reguły GLOBALNE: ${grzechy.join(", ")} — nav/skala zmieni się przy przejściu`)
+      : ok(`${css}: bez reguł globalnych`);
+  }
 
   const rs = fs.existsSync("root-scale.css") ? fs.readFileSync("root-scale.css", "utf8") : "";
   /^html\s*{/m.test(rs) && /--container-gutter/.test(rs) && /^\.nav_component/m.test(rs)
