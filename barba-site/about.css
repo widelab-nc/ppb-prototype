@@ -1,0 +1,337 @@
+/* ============================================================
+   Polpharma Biologics — ABOUT US prototype
+   Konwencja: class-structure-and-naming.md (rem, is-* + custom)
+   Hero 1:1 z Figmy 4473:7766. BEZ loadera (decyzja 2026-07-21).
+   Baza (vars/typo/nav) = 1:1 z _code/home/style.css
+   Assety wspólne: assets/ (skopiowane 2026-07-24, home w _archive) (fonty, green-shape.svg)
+   ============================================================ */
+
+/* Warstwa globalna → ../_shared/styleguide.css + ../_shared/nav/nav.css.
+   Tu TYLKO custom strony about. */
+
+ul { list-style: none; }
+
+/* DEV: wskaźnik „momentu" na osi journey (liczony od startu exitu unicorna) */
+.journey-moment-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding: 4px 10px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* NAV + NAV MASK + GET IN TOUCH (1:1 z home) → ../_shared/nav/nav.css */
+
+/* ============================================================
+   HERO (Figma 4473:7766) — 1:1
+   ============================================================ */
+.section.is-about-hero {
+  padding: 6.125rem 2rem 2rem;         /* 98 / 32 / 32 — hero = NATURALNA wysokość (paddingi + tekst) */
+  background: #033030;                 /* = kolor startowy gradientu; przy parallaxie odsłonięta góra jest bez szwu */
+  z-index: 2;                          /* nad journey (1); pod navem (50) — odjeżdża na scroll, POD spodem unicorn */
+  /* BEZ overflow:clip — gradient (parallax) może wystać poniżej hero i lekko przykryć unicorn */
+}
+/* warstwa gradientu — wypełnia hero (docelowy rozmiar). Kontr-parallax (JS) przesuwa
+   ją lekko W DÓŁ na scrollu: góra odsłania hero bg (#033030, bez szwu), dół schodzi
+   poniżej hero i odrobinę przykrywa unicorn. */
+.about-hero_bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #033030 0%, #005453 30%, #548B94 100%);
+  z-index: 0;                          /* pod contentem hero */
+}
+.about-hero_component {
+  position: relative;
+  z-index: 1;                          /* nad warstwą gradientu */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;                           /* 80 — gap GÓRNY (karty → tekst) */
+}
+/* Figma: dolny gap = 100 (tekst y198+h210=408 → karty y508), nie 80 jak górny */
+.about-hero_ghost-row.is-bottom { margin-top: 1.25rem; }  /* 80 + 20 = 100 */
+
+/* ucięte karty (opacity 15%): rząd = 2 karty 50/50, widoczny pasek 20px */
+.about-hero_ghost-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.about-hero_ghost-card {
+  height: 1.25rem;                     /* 20 */
+  border: 1px solid var(--lab-white);
+  border-bottom: none;
+  border-radius: 0.625rem 0.625rem 0 0;  /* 10 */
+}
+.about-hero_ghost-card + .about-hero_ghost-card { margin-left: -1px; } /* seam 1px jak w Figmie */
+.about-hero_ghost-row.is-bottom .about-hero_ghost-card {
+  border-bottom: 1px solid var(--lab-white);
+  border-top: none;
+  border-radius: 0 0 0.625rem 0.625rem;  /* flip pionowy z Figmy */
+}
+
+.about-hero_text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;                         /* 24 */
+  width: 57rem;                        /* 912 */
+  max-width: 100%;
+  text-align: center;
+}
+.about-hero_subtitle {
+  color: rgba(230, 239, 239, 0.9);     /* Mist 90% */
+}
+
+/* ============================================================
+   JOURNEY — sticky stage: unicorn shrink + text swap + parallax
+   ============================================================ */
+/* sekcja WYSOKA — wysokość ustawia JS = (1 + pinViewports + overlapViewports)×100vh.
+   ŻADNEGO overflow na sekcji (ubiłby sticky). */
+.section.is-about-journey {
+  padding: 0;
+  background: #005453;                 /* tło journey (gdzie ruszają się zdjęcia) = deep green */
+  /* Unicorn PO PROSTU POD SPODEM (bez overlapu): journey w normalnym flow za hero.
+     Hero (100vh) odjeżdża na scroll → journey/unicorn wjeżdża od dołu i pinuje się,
+     gdy dojdzie do góry (= hero "bottom top"); wtedy startuje shrink (initJourney). */
+  z-index: 1;                          /* pod hero (2); Purpose (10) najeżdża na koniec */
+}
+
+/* stage — sticky 100vh, wszystko żyje w środku (wzorzec We-know z home) */
+.about-journey_stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: clip;
+}
+
+/* ---------- warstwa obrazków (parallax) — PLACEHOLDERY ---------- */
+.about-journey_images {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  will-change: transform;   /* overlap: cała warstwa idzie lekko do góry */
+}
+/* KONTENER = maska: pionowy przelot przez viewport robi transform (y, scrub);
+   overflow:hidden przycina wewnętrzny obraz (paralaks w obrazie). */
+.about-journey_image {
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+  will-change: transform;
+}
+/* WEWNĘTRZNY obraz — 110% wysokości kontenera (10% zapasu na paralaks wewnątrz).
+   top:-10% → startuje z zapasem u góry; JS zjeżdża go 0→~10% w dół podczas przelotu. */
+.about-journey_image-inner {
+  position: absolute;
+  left: 0;
+  top: -10%;
+  width: 100%;
+  height: 110%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  will-change: transform;
+}
+
+/* rozmiary/pozycje KONTENERÓW (obraz + gradient-fallback na inner).
+   Pliki w assets/: city.jpg, vials.png, abstract.jpg, hand.jpg */
+.about-journey_image.is-img-city      { right: 0;    width: 20.75rem; height: 19rem; }       /* 332×304, prawa krawędź */
+.about-journey_image.is-img-vials     { left: 0;     width: 28rem;    height: 19.25rem; }    /* 448×308, lewa krawędź */
+.about-journey_image.is-img-abstract  { right: 6%;   width: 28rem;    height: 31.5rem; }     /* 448×504 */
+.about-journey_image.is-img-hand      { left: 10%;   width: 20.75rem; height: 13.875rem; }   /* 332×222 */
+.is-img-city     .about-journey_image-inner { background-image: url(assets/city.jpg),     linear-gradient(200deg, #7fb5b3, #2e6f6d 70%); }
+.is-img-vials    .about-journey_image-inner { background-image: url(assets/vials.png),    linear-gradient(180deg, #dfe9e9, #9fc4c2); }
+.is-img-abstract .about-journey_image-inner { background-image: url(assets/abstract.jpg), linear-gradient(120deg, #cfe3e2, #6ea8a6); }
+.is-img-hand     .about-journey_image-inner { background-image: url(assets/hand.jpg),     linear-gradient(180deg, #eef4f4, #8fb8b6); }
+
+/* ---------- teksty (2 stany) + wspólny diament ----------
+   NOWE centrowanie (2026-07-22): każdy STAN = flex column WYŚRODKOWANY w 100vh
+   (heading + slot na diament + caption, równy gap). Slot rezerwuje miejsce na
+   diament w kolumnie; wspólny diament rysowany osobno, JS ustawia jego Y na środek
+   slotu aktywnego stanu. Przy swapie diament jedzie transformem Y do slotu stanu 2
+   (+ rotate). Stany różnej wysokości → każdy centruje się sam, diament się przesuwa. */
+.about-journey_text-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 3;                /* NAD unicornem (2) — tekst na wierzchu */
+  text-align: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* stan = pełny stage, kolumna wyśrodkowana pionowo z gapem.
+   padding-top = wysokość navbara (JS: --nav-offset) → centrowanie liczone PONIŻEJ nava.
+   gap responsywny: 6.25rem na dużych ekranach, mniejszy na niskich (clamp z vh),
+   żeby tekst zawsze zmieścił się pod navem. */
+.about-journey_state {
+  position: absolute;
+  inset: 0;
+  padding-top: var(--nav-offset, 0px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 10vh, 6.25rem);   /* odstęp heading↔diament↔caption — kurczy się na niskich ekranach */
+}
+.about-journey_heading {
+  width: 100%;
+  max-width: 46rem;
+}
+.about-journey_caption {
+  color: rgba(230, 239, 239, 0.7);   /* mist 70% (przygaszona biel) */
+  white-space: nowrap;
+}
+/* slot w kolumnie = miejsce na diament (jego rozmiar); diament rysowany nad nim osobno */
+.about-journey_diamond-slot {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+}
+
+/* wspólny diament — absolutny; poziomo środek (left 50% + xPercent -50 z GSAP),
+   pionowo Y ustawia JS na środek slotu aktywnego stanu (yPercent -50 = centrowanie).
+   Wejście: opacity 0 / scale .7 / rotate −180 → 1/1/0; swap: Y→slot2 + rotate +90. */
+.about-journey_diamond {
+  position: absolute;
+  left: 50%;
+  top: 0;                    /* realny Y = transform y z JS (yPercent -50) */
+  width: 2.5rem;
+  height: 2.5rem;
+  opacity: 0;                /* stan początkowy — pokazuje GSAP (zero FOUC) */
+  will-change: transform;
+}
+.about-journey_diamond img { display: block; width: 100%; height: 100%; }
+
+/* ---------- unicorn (sticky shrink) — warstwa w stage'u ----------
+   100vw×100vh (canvas cover); na scrubie shrink RATIO → 332×432 + x → 20vw.
+   Wewnątrz sam embed Unicorn Studio (fallback usunięty — migał przy ładowaniu). */
+.about-journey_unicorn {
+  position: absolute;
+  top: 0; left: 0;           /* kotwica GÓRA — pionowo zmniejsza się "do góry" */
+  background: #043030;        /* tło sceny — widoczne zanim embed Unicorn Studio się załaduje */
+  width: 100vw;
+  height: 100vh;             /* wymiary + x animuje JS (RATIO → 332×432, x → 20vw) */
+  z-index: 2;                /* POD tekstami (3), nad obrazkami (1) — feedback Tomka */
+  overflow: clip;            /* wrapper = okno; scena w środku na COVER (utnie się) */
+  will-change: transform, width, height;
+}
+/* inner: scena w STAŁYCH proporcjach viewportu, centrowana; counter-scale
+   (cover: max(w/vw, h/vh)) ustawia JS w każdej klatce shrinku */
+.about-journey_unicorn-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100vw;
+  height: 100vh;
+  will-change: transform;
+}
+.about-journey_unicorn-embed {
+  position: absolute;
+  inset: 0;
+}
+.about-journey_unicorn-embed canvas { width: 100%; height: 100%; display: block; }
+
+/* ---------- czarny overlay (overlap z Purpose) ---------- */
+.about-journey_overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+   PURPOSE (screen 5) — statyczna, overlapuje journey
+   ============================================================ */
+.section.is-about-purpose {
+  background: var(--mist);
+  z-index: 10;
+  margin-top: -100vh;        /* overlap: najeżdża na sticky stage journey (SYNC z overlapViewports w JS!) */
+  padding-top: 8.75rem;      /* 140 — heading nisko pod navem (screen 5) */
+  padding-bottom: 10rem;
+}
+
+.about-purpose_heading { margin-bottom: 8.75rem; }
+
+/* intro: label lewo / paragraf prawo, hairline nad prawą kolumną */
+.about-purpose_intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+.about-purpose_label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--dark-stroke);
+}
+.about-purpose_label-dot {
+  width: 0.5rem; height: 0.5rem;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+}
+.about-purpose_intro-text {
+  max-width: 42.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--dark-stroke);
+}
+
+/* grid: karta zdjęciowa lewo / capabilities prawo */
+.about-purpose_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: end;
+  margin-top: 10rem;
+}
+.about-purpose_media {
+  width: 20.75rem; height: 20.75rem;   /* 332 */
+  border-radius: 0.5rem;
+  background: var(--lab-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.about-purpose_media-circle {
+  width: 16rem; height: 16rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fbe9ec, var(--mist) 70%);  /* placeholder fiolki */
+}
+
+.about-purpose_capabilities { text-align: left; }
+.about-purpose_list { margin-top: 1.5rem; }
+.about-purpose_item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--dark-stroke);
+}
+.about-purpose_item-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem; height: 2.375rem;
+  border-radius: 50%;
+  background: rgba(0, 84, 83, 0.08);
+  flex-shrink: 0;
+}
+
+/* FOUC guard [data-reveal] + .rv-* → ../_shared/styleguide.css */

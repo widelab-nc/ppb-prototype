@@ -1,0 +1,99 @@
+/* ============================================================
+   WARSTWA TRWAŁA — GLOBALNA SKALA STRONY (wydzielone 2026-07-28)
+
+   DLACZEGO OSOBNY PLIK: te reguły siedziały w `style.css`, czyli w arkuszu
+   STRONY (`data-page-css`), który transition.js odpina przy przejściu na about.
+   Skutek był taki, że root font-size i padding NAVA zmieniały się w połowie
+   przejścia:
+     · home  → `html{font-size: min(calc(...))}` = drabinka fluid (np. ~19px @1920)
+     · about → brak własnej reguły → `_shared/styleguide.css` `html{font-size:16px}`
+   Nav jest w rem i jest SITE-LEVEL (nie podmienia się), więc na oczach użytkownika
+   zmieniał rozmiar i padding. To był „glitch nawigacji" i „na home inne skalowanie".
+
+   Ten plik jest linkowany BEZ `data-page-css` na OBU stronach — nigdy nie znika,
+   więc skala jest jedna dla całego serwisu.
+
+   ⚠️ KONSEKWENCJA DLA ABOUT: about był budowany przy sztywnym 16px, a teraz
+   dostaje drabinkę fluid. Przy 1440 to dokładnie 16 (bez zmian), ale szerzej
+   rośnie, węziej maleje. Do obejrzenia — patrz README.
+
+   ⚠️ Ten blok jest KOPIĄ z `style.css` (usuniętą stamtąd). Docelowo trafia do
+   `_shared/styleguide.css` — to otwarta paczka #2 ze STATUS.md.
+   ============================================================ */
+
+/* ============================================================
+   FLUID ROOT FONT-SIZE (styl Webflow / Client-First) — GLOBALNE skalowanie strony.
+   Cały layout w rem; root px liczony płynnie z szerokości viewportu (interpolacja
+   liniowa między punktami). Strojenie skali = TYLKO 4 zmienne w :root.
+   ⚠️ Nadpisuje _shared html{font-size:16px}. <479px skalowanie wyłączone.
+   ============================================================ */
+:root {
+  --font-from: 16;
+  --font-to: 19;
+  --vw-from: calc(1440 / 100);
+  --vw-to: calc(1889 / 100);
+  --coefficient: calc((var(--font-to) - var(--font-from)) / (var(--vw-to) - var(--vw-from)));
+  --base: calc((var(--font-from) - var(--vw-from) * var(--coefficient)) / 16);
+}
+/* ============================================================
+   SUFIT OD WYSOKOŚCI (2026-07-27, decyzja Tomka)
+   Drabinka fluid skalowała stronę WYŁĄCZNIE od szerokości. Na oknach szerokich
+   i niskich (1920×800, 2300×830, 2560×900) tekst rósł z szerokości, a miejsca
+   w pionie nie przybywało → nagłówek „Your pure-play…" był zasłaniany przez kształt
+   wjeżdżający z dołu. Ten sam mechanizm od drugiej strony psuł wąskie i niskie (1440×660).
+   Zmierzone: luz ≈ 0,97·vh − 43,2·rem  →  luz ≥ 0 ⟺ rem ≤ vh/44,5.
+
+   Sufit = skala nie może przekroczyć tego, na co pozwala WYSOKOŚĆ okna.
+   Kalibracja wprost z artboardu 1440×800 → rem 16 przy 800px = 100vh × 0,02.
+   Zmierzone: 1440×800 i 1920×1080 BEZ ZMIAN, kolizje znikają.
+
+   Dotyka WYŁĄCZNIE warstwy rem. Sekcje 100vh, piny, sticky stage, wideo (cover)
+   i kształt handoffu są w vh/vw i nic o nim nie wiedzą — zweryfikowane pomiarem.
+   ⚠️ WYŁĄCZONY ≤991 (2026-07-27, MOBILE≤991: pasmo mobile ma własną drabinkę 375→991
+   i skaluje się TYLKO od szerokości — sufit od wysokości był kalibrowany do ramy 1440
+   i na pionowych ekranach dusiłby rem bez powodu).
+   Strojenie: 0.02 w górę = strona większa na niskich oknach.
+   ============================================================ */
+:root { --rem-cap: 999px; }
+@media (min-width: 992px) { :root { --rem-cap: calc(100vh * 0.02); } }
+
+html {
+  font-size: min(calc(var(--base) * 1rem + var(--coefficient) * 1vw), var(--rem-cap));
+}
+@media screen and (max-width: 1440px) {
+  :root { --font-from: 11; --font-to: 16; --vw-from: calc(991 / 100);  --vw-to: calc(1440 / 100); }  /* 13→11 (2026-07-24): desktop skaluje się PROPORCJONALNIE do ramy 1440 → mieści się do 992px bez nakładania */
+}
+/* 2026-07-27 MOBILE≤991 — drabinka mobile PRZEBUDOWANA (zastąpiła pasma ≤767 16→16
+   i 767→991 16→11). Próg layoutu mobile poszedł z 767 na 991 (spójnie z hamburgerem
+   nava @991), więc CAŁE pasmo ≤991 to teraz skalowany artboard mobile 375 (4473:6090…):
+     375→991   16 → 19    ← przy 375 dokładnie 16 = artboard 1:1; do 991 rośnie liniowo
+     991→1440  11 → 16    ← desktop bez zmian (11 = 991/1440×16, proporcja ramy 1440)
+     >1440     16 → 19
+   ⚠️ Na granicy 991/992 rem skacze 19 → ~11 CELOWO: w tym samym punkcie przełącza się
+   cały LAYOUT (artboard mobile 375 ↔ rama desktop 1440) — skok skali = zmiana układu,
+   stara zasada ciągłości dotyczyła pasm wewnątrz JEDNEGO układu. */
+@media screen and (max-width: 991px) {
+  :root { --font-from: 16; --font-to: 19; --vw-from: calc(375 / 100);  --vw-to: calc(991 / 100); }
+}
+
+
+/* ============================================================
+   WYRÓWNANIE DO KONTENERA (2026-07-24) — wszystkie elementy site-level i staty
+   przypięte do krawędzi KONTENERA (86rem, wycentrowany), nie do krawędzi viewportu.
+   --container-gutter = odległość krawędzi kontenera od krawędzi ekranu
+   (na szerokich = (100vw−86rem)/2; min 3rem = padding sekcji).
+   Nadpisuje shared nav.css / contact-cta page-scoped (bez ruszania _shared).
+   ============================================================ */
+/* 2026-07-24: min 3rem → 2rem, bo poziomy padding sekcji zjechał globalnie 48 → 32
+   (decyzja Tomka, za Figmą). Na 1440 daje to gutter dokładnie 32 i content 1376. */
+:root { --container-gutter: max(2rem, calc((100vw - 86rem) / 2)); }
+
+/* nav (baza + kopia w masce — obie .nav_component): treść w obrębie kontenera */
+.nav_component { padding-left: var(--container-gutter); padding-right: var(--container-gutter); }
+
+/* ---------- MOBILE ≤991: gutter z artboardu 375 (20px) ----------
+   Powtórzone z bloku mobile w `style.css`, bo nav (site-level) musi mieć ten sam
+   padding na obu stronach także poniżej 991. Ta sama wartość, jedno źródło decyzji. */
+@media (max-width: 991px) {
+  :root { --container-gutter: 1.25rem; }
+}

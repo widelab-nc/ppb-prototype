@@ -45,37 +45,3 @@ html { font-size: calc(var(--base) * 1rem + var(--coefficient) * 1vw); }
      i skaluje się tylko szerokością (karta 100%), nie rozmiarem tekstu. */
   :root { --font-from: 16; --font-to: 16; --vw-from: calc(320 / 100); --vw-to: calc(767 / 100); }
 }
-
-/* ============================================================
-   PANEL STROJENIA PARALLAXU (tylko prototyp — nie idzie do Webflow)
-   ============================================================ */
-.lag-panel {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 9999;
-  width: 15rem;
-  padding: 0.875rem 1rem;
-  border-radius: 0.75rem;
-  background: rgba(22, 21, 23, 0.9);
-  color: #fff;
-  font: 400 12px/1.4 ui-monospace, monospace;
-  backdrop-filter: blur(8px);
-}
-.lag-panel[hidden] { display: none; }
-.lag-panel h4 { font-size: 12px; margin-bottom: 0.5rem; opacity: 0.6; font-weight: 400; }
-.lag-panel label { display: block; margin-bottom: 0.4rem; }
-.lag-panel input[type="range"] { width: 100%; }
-.lag-panel .lag-panel_row { opacity: 0.55; margin-bottom: 0.6rem; }
-.lag-panel .lag-panel_group {
-  margin-bottom: 0.6rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-}
-.lag-panel .lag-panel_group i {
-  display: block;
-  font-style: normal;
-  margin-bottom: 0.35rem;
-  color: #16ABA9;
-}
-.lag-panel .lag-panel_hint { opacity: 0.45; margin-top: 0.5rem; }

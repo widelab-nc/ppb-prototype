@@ -35,10 +35,15 @@
      delta > 0 (elementy uciekają w lewo)  → czoło po prawej → rank = n−1−index
    Duration rośnie z rankiem ⇒ odstępy w grupie zawsze rosną, nigdy nie maleją.
 
-   Strojenie na żywo: klawisz „P" otwiera panel.
+   Strojenie na żywo: panel z suwakami włącza atrybut `data-lag-tune` na sekcji
+   albo `?tune` w URL. Panel wstrzykuje własne style, więc działa na każdej
+   stronie bez dokładania CSS-a. Klawisz „P" chowa/pokazuje.
    ============================================================ */
 (function () {
   "use strict";
+
+  /* style panelu strojenia (wstrzykiwane tylko gdy panel jest włączony) */
+  var PANEL_CSS = ".lag-panel {\n  position: fixed;\n  right: 1rem;\n  bottom: 1rem;\n  z-index: 9999;\n  width: 15rem;\n  padding: 0.875rem 1rem;\n  border-radius: 0.75rem;\n  background: rgba(22, 21, 23, 0.9);\n  color: #fff;\n  font: 400 12px/1.4 ui-monospace, monospace;\n  backdrop-filter: blur(8px);\n}\n.lag-panel[hidden] { display: none; }\n.lag-panel h4 { font-size: 12px; margin-bottom: 0.5rem; opacity: 0.6; font-weight: 400; }\n.lag-panel label { display: block; margin-bottom: 0.4rem; }\n.lag-panel input[type=\"range\"] { width: 100%; }\n.lag-panel .lag-panel_row { opacity: 0.55; margin-bottom: 0.6rem; }\n.lag-panel .lag-panel_group {\n  margin-bottom: 0.6rem;\n  padding-top: 0.5rem;\n  border-top: 1px solid rgba(255, 255, 255, 0.14);\n}\n.lag-panel .lag-panel_group i {\n  display: block;\n  font-style: normal;\n  margin-bottom: 0.35rem;\n  color: #16ABA9;\n}\n.lag-panel .lag-panel_hint { opacity: 0.45; margin-top: 0.5rem; }";
 
   /* duration w ms; `lead` = element na czole ruchu, `trail` = zamykający.
      Reszta grupy dostaje wartości interpolowane liniowo między nimi.
@@ -276,7 +281,17 @@
      (jest w `home-insights/index.html`, nie ma go w `home-full`).
      Dzięki temu ten sam plik JS idzie na stronę bez wycinania czegokolwiek.
      ============================================================ */
-  if (!document.querySelector(".is-home-insights[data-lag-tune]")) return;
+  var TUNE = document.querySelector(".is-home-insights[data-lag-tune]")
+          || /[?&]tune\b/.test(location.search);
+  if (!TUNE) return;
+
+  /* Panel wstrzykuje WŁASNE style — dzięki temu wystarczy `data-lag-tune`
+     na sekcji (albo `?tune` w URL) i działa na dowolnej stronie, bez
+     linkowania dodatkowego CSS-a. Wcześniej style siedziały w CSS prototypu,
+     więc na `home-full` panel wyrenderowałby się goły. */
+  var css = document.createElement("style");
+  css.textContent = PANEL_CSS;
+  document.head.appendChild(css);
 
   var html = '<h4>parallax — „P" chowa</h4>' +
     '<div class="lag-panel_row">slajd (swiper speed): <b>800</b>ms</div>';

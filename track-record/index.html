@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polpharma Biologics — Track record (prototyp sekcji)</title>
+
+  <!-- WARSTWA GLOBALNA (_shared) — niczego stąd nie kopiujemy lokalnie -->
+  <link rel="preload" href="../_shared/fonts/ConcretteM-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="../_shared/fonts/SeasonSans-Medium.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="../_shared/styleguide.css" />
+  <link rel="stylesheet" href="style.css?v=20260727b" />   <!-- TYLKO custom sekcji -->
+</head>
+<body>
+
+  <main>
+    <!-- przestrzeń nad sekcją (TYLKO prototyp — żeby było widać wjazd) -->
+    <section class="section" style="min-height:80vh;"></section>
+
+    <!-- ============ SEKCJA: TRACK RECORD (Figma node 4941:2584 / 4941:2662) ============ -->
+    <section class="section is-track-record" data-nav-theme="light">
+
+      <!-- intro heading — przewija się normalnie i znika u góry przed przyklejeniem -->
+      <h2 class="is-h-m is-text-deep-green track-record_intro" data-reveal>
+        Proven in practice. A track record built over decades of GMP and regulatory delivery.
+      </h2>
+
+      <!-- wrapper = DŁUGOŚĆ scrolla (pasmo + dystans choreografii); trigger ScrollTriggera -->
+      <div class="track-record_sticky">
+        <!-- pasmo STICKY (CSS position:sticky) — okno, w którym jedzie tor -->
+        <div class="track-record_band">
+          <!-- TOR: jedzie w lewo W CAŁOŚCI, razem z kolumną tekstu -->
+          <div class="track-record_track">
+
+            <!-- kolumna 0: tekst kolorujący się na scroll + diament (część toru) -->
+            <div class="track-record_col" data-col="lead">
+              <div class="track-record_headline">
+                <h3 class="is-t-l is-text-deep-green" data-highlight>
+                  Our efficient operating model advances biosimilar programs and supports partners through approval and long-term supply.
+                </h3>
+              </div>
+              <span class="track-record_diamond" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none"><rect x="11" y="11" width="26" height="26" rx="8" transform="rotate(45 24 24)" stroke="currentColor" stroke-width="2"/></svg>
+              </span>
+            </div>
+
+            <!-- kolumna 1: tekst góra / petri dół -->
+            <div class="track-record_col">
+              <div class="track-record_entry" data-narrow>
+                <div class="track-record_dates">
+                  <span class="is-caption is-text-deep-green">1935</span>
+                  <span class="track-record_dates-dot"></span>
+                  <span class="is-caption is-text-deep-green">2019</span>
+                </div>
+                <p class="is-b-s is-text-deep-green" data-reveal="track-record">
+                  Decades of GMP manufacturing, regulatory expertise, and global partnerships, built through Polpharma.
+                </p>
+              </div>
+              <figure class="track-record_media" data-media="petri">
+                <img src="assets/track-petri.jpg" alt="" decoding="async" />
+              </figure>
+            </div>
+
+            <!-- kolumna 2: fiolki 3D w kole (koło rysowane w CSS) góra / tekst dół -->
+            <div class="track-record_col">
+              <div class="track-record_circle">
+                <img class="track-record_vials" src="assets/track-vials.png" alt="" decoding="async" />
+              </div>
+              <div class="track-record_entry">
+                <div class="track-record_dates">
+                  <span class="is-caption is-text-deep-green">2013</span>
+                  <span class="track-record_dates-dot"></span>
+                  <span class="is-caption is-text-deep-green">2016</span>
+                </div>
+                <p class="is-b-s is-text-deep-green" data-reveal="track-record">
+                  Entry into biologics, with dedicated R&amp;D and development capabilities established to advance biosimilar programs
+                </p>
+              </div>
+            </div>
+
+            <!-- kolumna 3 (ostatnia): tekst góra / woda dół -->
+            <div class="track-record_col" data-wide>
+              <div class="track-record_entry">
+                <div class="track-record_dates">
+                  <span class="is-caption is-text-deep-green">2019</span>
+                </div>
+                <p class="is-b-s is-text-deep-green" data-reveal="track-record">
+                  First out-licensing agreements signed for biosimilar programs
+                </p>
+              </div>
+              <figure class="track-record_media" data-media="water">
+                <img src="assets/track-water.jpg" alt="" decoding="async" />
+              </figure>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- przestrzeń pod sekcją (TYLKO prototyp — żeby było widać wyjście) -->
+    <section class="section" style="min-height:100vh;"></section>
+  </main>
+
+  <!-- CDN: gsap + ScrollTrigger (wersje jak w całym projekcie) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <!-- WARSTWA GLOBALNA: config + system #1 (line-reveal) + system #4 (highlight) -->
+  <script src="../_shared/gsap-config.js"></script>
+  <script src="../_shared/reveal.js"></script>
+  <script src="../_shared/highlight.js"></script>
+  <script src="script.js?v=20260727b"></script>   <!-- TYLKO choreografia sekcji -->
+</body>
+</html>

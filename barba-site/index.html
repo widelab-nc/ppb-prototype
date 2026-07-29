@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polpharma Biologics — Home [BARBA-SITE]</title>
+  <link rel="preload" href="../_shared/fonts/ConcretteM-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="../_shared/fonts/SeasonSans-Medium.woff2" as="font" type="font/woff2" crossorigin />
+
+  <!-- ============================================================
+       CSS: dwie warstwy.
+       TRWAŁA (bez data-page-css) — zostaje przez całą sesję, wspólna dla stron.
+       STRONY (data-page-css) — transition.js podmienia ją pod zasłoną wipe'a.
+       Arkusze stron nadpisują te same reguły (m.in. FLUID ROOT ustawiający
+       html{font-size}), więc NIE mogą leżeć obok siebie.
+       ============================================================ -->
+  <link rel="stylesheet" href="../_shared/styleguide.css" />
+  <link rel="stylesheet" href="../_shared/nav/nav.css" />
+  <link rel="stylesheet" href="../_shared/site-footer/site-footer.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
+  <!-- SKALA GLOBALNA — warstwa TRWAŁA, BEZ data-page-css.
+       Root font-size (drabinka fluid) + --container-gutter + padding nava.
+       Musi przeżyć podmianę arkuszy stron, inaczej nav (site-level, w rem)
+       zmienia rozmiar w połowie przejścia. Szczegóły w root-scale.css. -->
+  <link rel="stylesheet" href="root-scale.css?v=20260729-081453" />
+
+  <link rel="stylesheet" href="style.css?v=20260729-081453" data-page-css />
+  <link rel="stylesheet" href="../home-webflow-sections/style.scoped.css" data-page-css />
+  <!-- INSIGHTS (sekcja home) — style sekcji; skalowanie root font-size dostarcza style.css -->
+  <link rel="stylesheet" href="../home-insights/section.css" data-page-css />
+
+  <!-- ============================================================
+       BUG FIX 2026-07-28 (a) — SCROLL RESTORATION.
+       To MUSI stać w <head>, nie na dole <body> (było w script.js).
+       Przeglądarka przywraca scroll i maluje klatkę ZANIM dojdzie do skryptów
+       na końcu dokumentu — stąd widoczny przeskok przy przeładowaniu.
+       ============================================================ -->
+  <script>if ("scrollRestoration" in history) history.scrollRestoration = "manual";</script>
+
+  <!-- ============================================================
+       BUG FIX 2026-07-28 (b) — LOADER WRACAŁ PRZY POWROCIE NA HOME.
+       Loader był chowany GSAP-em (autoAlpha + display) WEWNĄTRZ kontekstu
+       strony, a `ctx.revert()` w destroy() cofa inline'y GSAP — czyli wyjście
+       z home go ODCHOWYWAŁO. Na about nie było tego widać, bo cały styl
+       loadera siedzi w `style.css`, który jest wtedy odpięty (data-page-css);
+       loader był tam nieostylowanym divem. Po powrocie style wracały i loader
+       znów zasłaniał ekran.
+
+       Dlatego chowamy go KLASĄ, nie stylem inline: `classList` nie jest
+       własnością GSAP, więc revert go nie rusza. Reguła leży w <style>
+       w <head>, czyli w warstwie TRWAŁEJ — nie znika przy swapie CSS stron.
+       ============================================================ -->
+  <style>
+    /* 1. Chowanie na stałe — klasa przeżywa ctx.revert(), inline GSAP nie. */
+    .loader_component.is-done { display: none !important; }
+
+    /* 2. PAS BEZPIECZEŃSTWA. Pełny styl loadera siedzi w `style.css`, czyli
+       w warstwie STRONY — na about jest odpięty i loader stawał się zwykłym
+       blokiem W FLOW, spychającym cały layout w dół (biały prześwit).
+       Te trzy właściwości muszą być w warstwie TRWAŁEJ, żeby loader nigdy
+       nie brał udziału w układzie strony, niezależnie od tego, który arkusz
+       jest aktualnie wpięty. */
+    .loader_component { position: fixed; inset: 0; z-index: 100; }
+
+    /* 3. KONTENER STRONY = WŁASNY KONTEKST UKŁADANIA (2026-07-28).
+       Zasłona przejścia leży POD navem (z-index 40 < 50), żeby nav nigdy nie
+       znikał ani nie mrugał. Żeby to zadziałało, treść strony nie może się nad
+       zasłonę przebijać — a przebijałaby: sekcje Webflow mają `z-index: 2000`,
+       wskaźnik DEV na about `9999`. `isolation: isolate` zamyka je wszystkie
+       w kontekście o z-indeksie 0. Nie tworzy bloku zawierającego dla `fixed`
+       (to robi transform/filter), więc piny i sticky działają bez zmian.
+       Drabinka: treść (0) < zasłona (40) < nav (50) < maska (51) < menu (80/90) < loader (100). */
+    [data-barba="container"] { position: relative; z-index: 0; isolation: isolate; }
+  </style>
+</head>
+<body>
+
+  <!-- Wspólne defs dla navbara: inner shadow wariantu dark (Figma: FFFFFF 15%, X -1.13 Y 1.13, blur 2.26)
+       — musi być RAZ w DOM strony (Webflow: embed z ukrytym svg) -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="navInnerShadow" color-interpolation-filters="sRGB">
+        <feColorMatrix in="SourceAlpha" type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+        <feOffset dx="-1.12875" dy="1.12875"/>
+        <feGaussianBlur stdDeviation="1.12875"/>
+        <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.15 0"/>
+        <feBlend mode="normal" in2="SourceGraphic"/>
+      </filter>
+
+      <!-- DOPASOWANIE TONU SEKWENCJI BUTELKI DO TAŚMY (2026-07-26).
+           PNG jest w sRGB, taśma to H.264 (BT.709) — przeglądarka renderuje je inną ścieżką
+           koloru i na styku widać ~3-4 % różnicy. Zmierzone regresją: model GAMMA pasuje
+           z błędem ~1/255, model „jasność" z błędem ~4/255 → stąd feComponentTransfer,
+           a nie filter: brightness(). Wykładnik strojony w key-pillars.js (CONFIG.bottle.gamma).
+           ⚠️ color-interpolation-filters="sRGB" jest KONIECZNE (domyślnie SVG liczy w linearRGB). -->
+      <filter id="bottleMatch" color-interpolation-filters="sRGB">
+        <feComponentTransfer>
+          <feFuncR type="gamma" amplitude="1" exponent="0.874" offset="0"/>
+          <feFuncG type="gamma" amplitude="1" exponent="0.874" offset="0"/>
+          <feFuncB type="gamma" amplitude="1" exponent="0.874" offset="0"/>
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- ============ LOADER (site-level overlay) ============ -->
+  <div class="loader_component">
+    <p class="is-b-m is-text-deep-green loader_caption is-left">Impact-driven</p>
+    <p class="is-b-m is-text-deep-green loader_caption is-right">Biosimilars</p>
+
+    <!-- LOADER: Lottie 01D (zbieżność kształtów + ekspansja koła do deep-green cover) — zastąpiła 2 kształty -->
+    <div class="loader_lottie" aria-hidden="true"></div>
+  </div>
+
+  <!-- ============ NAV (site-level, fixed) — wersja BIAŁA (ciemne tła) ============ -->
+  <header class="nav_component" data-reveal="ui">
+    <a href="index.html" class="nav_brand">
+      <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+    </a>
+    <!-- Navigation Links (komponent z _code/navbar/) — wariant DARK-BG (ciemne tła) -->
+    <nav class="nav_links-component is-dark-bg" aria-label="Main navigation">
+      <div class="nav_menu">
+        <div class="nav_menu-blur" aria-hidden="true"></div>
+        <svg class="nav_menu-bg" height="42" aria-hidden="true">
+          <path class="nav_menu-shape" d=""/>
+        </svg>
+        <span class="nav_drop">
+          <a href="#" class="nav_link is-b-s is-drop" aria-haspopup="true" aria-expanded="false">
+            Company
+            <svg class="nav_link-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+            </svg>
+          </a>
+          <div class="nav_dropdown" role="menu">
+            <a href="about.html" class="nav_dropdown-link is-b-s" role="menuitem">About us</a>
+            <a href="#" class="nav_dropdown-link is-b-s" role="menuitem">What we do</a>
+          </div>
+        </span>
+        <a href="#" class="nav_link is-b-s">Pipeline</a>
+        <a href="#" class="nav_link is-b-s">Partnerships</a>
+        <a href="#" class="nav_link is-b-s">Insights</a>
+        <a href="#" class="nav_link is-b-s">Careers</a>
+      </div>
+      <a href="#" class="nav_cta">
+        <span class="is-b-s is-emphasis is-text-lab-white">Contact</span>
+      </a>
+    </nav>
+
+    <!-- hamburger (≤991px) — czerwona pigułka, Figma 4473:6110 -->
+    <button class="nav_hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navMobile">
+      <span class="nav_hamburger-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+  </header>
+
+  <!-- ============ NAV MASK (system #2 v2) ============
+       Wrapper CELOWO PUSTY: ciemną kopię nava generuje nav-v2.js (cloneNode
+       z bazowego nava — jedno źródło markupu; edytuj TYLKO bazowy nav wyżej).
+       Motywy sekcji: data-nav-theme="light|dark" na sekcjach. Dokumentacja: docs/NAV.md -->
+  <div class="nav-mask_component" aria-hidden="true"></div>
+
+  <!-- GET IN TOUCH: 2026-07-27 MOBILE≤991 — element PRZENIESIONY do .home-hero_component
+       (wzorzec home-part1): desktop absolute w komponencie = ta sama pozycja co dawne
+       site-level (right:0 == krawędź kontenera, top liczony od 0 dokumentu); mobile = zwykły
+       flow pod podtytułem (CTA z artboardu 375). Patrz style.css .contact-cta_component. -->
+
+  <!-- ============ MOBILE MENU (pełnoekranowy overlay, Figma 4473:6772) ============ -->
+  <div class="nav-mobile" id="navMobile" aria-hidden="true">
+    <div class="nav-mobile_bar">
+      <span class="nav_brand">
+        <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+      </span>
+      <button class="nav-mobile_close" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="nav-mobile_list" aria-label="Mobile navigation">
+      <a href="about.html" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">About us</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">What we do</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Pipeline</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Partnerships</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Insights</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Careers</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Contact</span></a>
+    </nav>
+    <a href="#" class="nav-mobile_cta">
+      <span class="nav-mobile_cta-dots" aria-hidden="true"></span>
+      <span class="is-b-s is-emphasis is-text-lab-white">Get in touch</span>
+    </a>
+  </div>
+
+  <!-- ============================================================
+       KONIEC WARSTWY SITE-LEVEL. Wszystko powyżej (svg-defs, loader, nav,
+       maska nava, mobilne menu) leży POZA kontenerem Barby i przy nawigacji
+       NIE jest podmieniane — musi być IDENTYCZNE na obu stronach.
+       Poniżej zaczyna się kontener strony: to jego Barba wymienia.
+       ============================================================ -->
+  <div data-barba="wrapper">
+  <div data-barba="container" data-barba-namespace="home" data-nav-theme-root="dark">
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section class="section is-home-hero">
+      <!-- tło: Unicorn Studio embed + gradientowy fallback pod spodem (parallax na scroll) -->
+      <div class="home-hero_background" aria-hidden="true">
+        <div class="home-hero_bg-shape is-top"></div>
+        <div class="home-hero_bg-shape is-bottom"></div>
+        <div class="home-hero_unicorn" data-us-project="1fS9tMUsKehA5rXg5ejN"></div>
+        <div class="home-hero_overlay"></div>
+      </div>
+
+      <div class="container">
+        <div class="home-hero_component">
+          <!-- 2026-07-27 MOBILE≤991: neutralny wrapper _copy pod scrubowany fade-out
+               (heading/subtitle mają FOUC guard [data-reveal] — scrub na nich łapałby 0;
+               wzorzec i wyjaśnienie: home-part1). -->
+          <div class="home-hero_copy">
+            <h1 class="is-h-l is-text-lab-white home-hero_heading" data-reveal="text">
+              Biosimilarity isn&rsquo;t discovered. It&rsquo;s&nbsp;engineered.
+            </h1>
+            <p class="is-t-s home-hero_subtitle" data-reveal="text">Precision in every molecule.</p>
+          </div>
+          <!-- GET IN TOUCH — przeniesiony z body (2026-07-27 MOBILE≤991, komentarz przy masce nav):
+               desktop pozycjonuje absolute w komponencie (1:1 ze starą pozycją), mobile flow. -->
+          <a href="#" class="contact-cta_component" data-reveal="ui">
+            <span class="contact-cta_dots" aria-hidden="true"></span>
+            <span class="is-b-s contact-cta_label">Get in touch</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="home-hero_arrow" data-reveal="ui" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" stroke="#005453" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ PINNED FLOW: How it works → Section-1 → Section-End ============ -->
+    <section class="section is-home-how-it-works">
+      <div class="home-how-it-works_pin">
+
+        <!-- header (znika pod ekspandującą maską) -->
+        <div class="container home-how-it-works_header">
+          <span class="home-how-it-works_bracket" data-reveal="hiw-bracket" aria-hidden="true"></span>
+          <span class="home-how-it-works_bracket is-right" data-reveal="hiw-bracket" aria-hidden="true"></span>
+          <h2 class="is-h-m is-text-lab-white home-how-it-works_heading" data-reveal="hiw-text">
+            Your pure-play<br>biosimilar developer with an<br>international track record.
+          </h2>
+          <p class="is-t-s home-how-it-works_subtitle" data-reveal="hiw-text">Built to accelerate biosimilar pipelines.</p>
+        </div>
+
+        <!-- maska z wideo (rośnie do fullscreen, wideo scrub) -->
+        <div class="home-how-it-works_media-wrapper" aria-hidden="true">
+          <div class="home-how-it-works_media">
+            <video class="home-how-it-works_video" src="assets/hero-seed.mp4" muted playsinline preload="auto"></video>
+            <!-- MOBILE≤991 (2026-07-28, decyzja Tomka): overlay gradientu NAD wideo —
+                 od góry okna (100 % koloru) do 10 % wysokości wideo (0 % = przejrzysty).
+                 Zastąpił maskę `--vfade` na samym wideo. Kolor i zasięg to knoby:
+                 CSS `--vfade-color` + CONFIG.featureShape.mobileTopFadeFrac.
+                 Wysokość i krycie liczy applyVideoFit/applyTopFade (script.js);
+                 na desktopie element jest wygaszony (opacity 0, height 0). -->
+            <div class="home-how-it-works_video-fade" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <!-- overlay: stats set 1 (Section-1) -->
+        <div class="home-how-it-works_stats is-set-1">
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Approved biosimilars</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">8</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Years biologics expertise</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">12+</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Regulatory standards</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">EMA &middot; FDA</p>
+          </div>
+        </div>
+
+        <!-- overlay: stats set 2 (Section-End) -->
+        <div class="home-how-it-works_stats is-set-2">
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Partners worwide</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">8</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Operating from Zug</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">Switzerland</p>
+          </div>
+          <div class="home-how-it-works_stat">
+            <div class="home-how-it-works_stat-line" aria-hidden="true"></div>
+            <p class="is-b-s home-how-it-works_stat-label">Global reach</p>
+            <p class="is-t-m is-text-lab-white home-how-it-works_stat-value">EU &middot; US &middot; MENA +</p>
+          </div>
+        </div>
+
+        <!-- overlay: WHAT WE DO (dół-lewo, wspólny dla obu setów) -->
+        <div class="home-how-it-works_what-we-do">
+          <p class="is-caption is-text-lab-white home-how-it-works_label"><span class="home-how-it-works_label-dot"></span>WHAT WE DO</p>
+          <h3 class="is-h-s is-text-lab-white home-how-it-works_label-heading">We produce impact<br>driven biosimilars. From<br>concept to end market.</h3>
+        </div>
+
+        <!-- ciemny overlay na wideo podczas najazdu następnej sekcji -->
+        <div class="home-how-it-works_dark-overlay" aria-hidden="true"></div>
+
+      </div>
+    </section>
+
+    <!-- ============ WE KNOW (The problem) → OUR GOAL ============
+         REFAKTOR (paczka 2): sekcja WYSOKA, zero GSAP-pinu.
+         - _stage: sticky 100vh (tła: apla + shape'y)
+         - _content: kolumna scrollująca NAD stage'em; teksty = sticky,
+           offsety startowe zgrane tak, że wp1 i tytuł LOCKUJĄ SIĘ równocześnie
+         - _wp1 (50vh, środek ekranu) > _w1 flex column space-between:
+           paragraf → diament (margin auto) → notka — zero absolute
+         - _w2 absolute inset 0 (TE SAME wymiary co w1): teksty Our goal wskakują 1:1
+         - tytuły We know / Our goal w JEDNYM wrapperze (podmiana w miejscu) -->
+    <section class="section is-home-we-know" data-nav-theme="light">
+      <!-- MOBILE≤991 (2026-07-28): warstwa APLI. Istnieje po to, żeby biel dała się
+           WŁOŻYĆ MIĘDZY dwie kopie kształtu: ostra kopia handoffu ma z-index 0,
+           ta warstwa 1, stage z rozmytą kartą 2. Dzięki temu ostra kopia wystaje
+           NAD górną krawędź sekcji (widać ją na wideo), a w środku sekcji jest
+           zakryta bielą. Na desktopie: display:none (tam aplę robi _bg na scrubie). -->
+      <div class="home-we-know_apla-bg" aria-hidden="true"></div>
+      <!-- sticky stage — full viewport (odpowiednik dawnego pinu): tła + TYTUŁY -->
+      <div class="home-we-know_stage">
+        <!-- shape + butelki BLUR (warstwa bazowa, pod aplą) — MIRROR aplaShape (4 butelki),
+             tylko rozmyte; apla odkrywa ostrą kopię = "apla zdejmuje blur". Kolejność DOM 1:1 z aplaShape. -->
+        <div class="home-we-know_shape" aria-hidden="true">
+          <img class="feature-shape_svg" src="assets/shape.svg" alt="" />
+          <!-- wrapper 4 rozmytych butelek — opacity fade na GRUPIE (nie per-butelka, żeby przenikanie się nie nakładało) -->
+          <div class="feature-shape_bottles">
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle" src="assets/bottle-v3.png" alt="" />
+          </div>
+        </div>
+
+        <!-- apla (mist) — wjeżdża z dołu; w środku OSTRA kopia (kontr-transform)
+             → overflow:hidden apli odkrywa ją naturalnie, krawędź zawsze = krawędź apli -->
+        <div class="home-we-know_bg" aria-hidden="true">
+          <div class="home-we-know_shape is-in-apla">
+            <!-- w apli shape jest BIAŁY (maska koloru; docelowy hex — dogra Tomek) -->
+            <img class="feature-shape_svg" src="assets/shape-white.svg" alt="" />
+            <!-- duplikaty (za główną, wysuwają się w lewo na scrub) — kolejność DOM: najdalsza pierwsza -->
+            <img class="feature-shape_bottle is-sharp is-dup" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle is-sharp is-dup" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle is-sharp is-dup" src="assets/bottle-v3.png" alt="" />
+            <img class="feature-shape_bottle is-sharp" src="assets/bottle-v3.png" alt="" />
+          </div>
+        </div>
+
+        <!-- wp1 — ZAWSZE w miejscu docelowym (absolute w stage'u); na scrubie robimy
+             tylko TRANSFER POZYCJI (y z dołu ekranu → 0, okno w CONFIG.weKnow.seg) -->
+        <div class="home-we-know_wp1">
+          <!-- w1: relative, flex column space-between — para → diament → notka -->
+          <div class="home-we-know_w1">
+            <!-- SYSTEM #4 (highlight): tekst stoi i doswietla sie scrollem, wyraz po wyrazie.
+                 `data-highlight` bez wartosci = jednostka domyslna z configu (word).
+                 Zakres scrolla podaje script.js przez highlightOnScroll — sekcja jest sticky,
+                 wiec procentowy `end` nie ma sensu (_shared/README.md, „uzycie programowe").
+                 ⚠️ Splitter bierze czysty textContent, wiec ZAGNIEZDZONE SPANY zniknely
+                 (`_paragraph-main` / `_paragraph-muted`). Byly juz martwe: kolorowanie liter
+                 zastapilo span-swap 2026-07-26, a `gsap.set(paraChars, color)` i tak nadpisywal
+                 ich kolor na starcie. -->
+            <p class="is-h-s home-we-know_paragraph" data-highlight>
+              that most biosimilar programs don&rsquo;t fail on science. They fail at the transitions.
+            </p>
+            <!-- diament — margin auto góra/dół (space-between centruje); wspólny dla obu stanów -->
+            <div class="home-we-know_diamond" aria-hidden="true">
+              <img src="assets/green-shape.svg" alt="" />
+            </div>
+            <p class="is-b-m home-we-know_note">The molecule isn&rsquo;t the risk.<br>The transitions are.</p>
+          </div>
+          <!-- w2: absolute, TE SAME wymiary co w1 — teksty Our goal wskakują 1:1 (diament zostaje z w1) -->
+          <div class="home-we-know_w2">
+            <p class="is-h-s home-we-know_goal-paragraph" data-reveal="our-goal">is to keep every program seemlessly moving as one system, from concept to commercial supply.</p>
+            <p class="is-b-m home-we-know_goal-note" data-reveal="our-goal">Full biosimilar lifecycle.<br>One global development strategy.</p>
+          </div>
+        </div>
+
+        <!-- tytuły — jeden wrapper, CENTROWANY na linii 50vh (translateY -50%), podmiana w miejscu;
+             "We know" POJAWIA SIĘ (globalny reveal) duże na starcie okna transferu + shrink na scrubie -->
+        <div class="home-we-know_title-wrap">
+          <h2 class="home-we-know_title" data-reveal="we-know">We know</h2>
+          <h2 class="home-we-know_goal-title" data-reveal="our-goal">Our goal</h2>
+        </div>
+
+        <!-- NACHODZENIE: solidny overlay rosnący gdy blok key-pillars wjeżdża na We know
+             (opacity sterowany w key-pillars.js → initEntryOverlap) -->
+        <div class="home-we-know_overlay" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         KEY PILLARS (merge z _code/key-pillars/ — 3 sekcje po kolei)
+         Doklejone na SAMYM DOLE strony, po is-home-we-know.
+         Choreografia: home-full/key-pillars.js (initIntro/initKeyPillars/initConcept).
+         ============================================================ -->
+
+    <!-- ============ 1) INTRO — „Swiss engineered, supplied globally" (node 4473:5304)
+         Nawias rośnie POZIOMO od brzegów do środka, RÓWNO z reveal'em tekstu (wariant C). ============ -->
+    <!-- BLOK: intro + key-pillars POŁĄCZONE i NACHODZĄCE na We-know (z-index:20 + margin-top:-100vh na .home-key-pillars-block) -->
+    <div class="home-key-pillars-block">
+    <section class="section is-home-key-pillars-intro">
+      <div class="container">
+        <div class="home-key-pillars-intro_component">
+
+          <div class="home-key-pillars-intro_line is-top" aria-hidden="true">
+            <span class="home-key-pillars-intro_line-seg is-a"></span>
+            <span class="home-key-pillars-intro_line-seg is-b"></span>
+          </div>
+
+          <div class="home-key-pillars-intro_copy">
+            <h2 class="is-h-l is-text-deep-green home-key-pillars-intro_heading" data-reveal="intro">Swiss engineered, supplied globally</h2>
+            <p class="is-t-s home-key-pillars-intro_subheading" data-reveal="intro">Why partners trust us.</p>
+          </div>
+
+          <div class="home-key-pillars-intro_line is-bottom" aria-hidden="true">
+            <span class="home-key-pillars-intro_line-seg is-a"></span>
+            <span class="home-key-pillars-intro_line-seg is-b"></span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 2) KEY PILLARS — sticky (pin) + scroll ============ -->
+    <section class="section is-home-key-pillars">
+      <div class="home-key-pillars_pin">
+        <div class="container">
+          <div class="home-key-pillars_component">
+
+            <!-- ===== LEWA KOLUMNA (332) ===== -->
+            <div class="home-key-pillars_left">
+
+              <div class="home-key-pillars_top">
+                <div class="home-key-pillars_intro">
+
+                  <div class="home-key-pillars_label">
+                    <span class="home-key-pillars_label-dot" aria-hidden="true"></span>
+                    <p class="is-caption is-text-deep-green home-key-pillars_label-text" data-reveal="pillars">key pillars</p>
+                  </div>
+
+                  <div class="home-key-pillars_copy">
+                    <!-- 1 — MARKET REACH (1:1 z Figmy) — stan startowy swapa (start:0) -->
+                    <div class="home-key-pillars_copy-item" data-copy="0">
+                      <h2 class="is-h-s is-text-deep-green home-key-pillars_heading">A foundation <br>for reach</h2>
+                      <p class="is-b-m home-key-pillars_paragraph">We build every program to be regulatory-ready across geographies, giving our commercial partners the fastest possible path to their markets.</p>
+                    </div>
+                    <!-- 2 — REGULATORY, IP & QUALITY -->
+                    <div class="home-key-pillars_copy-item" data-copy="1">
+                      <h2 class="is-h-s is-text-deep-green home-key-pillars_heading">A clean track <br>record</h2>
+                      <p class="is-b-m home-key-pillars_paragraph">Development pathways built on regulatory rigor, so partners commercialize with certainty. Every product we&rsquo;ve brought to approval cleared without regulatory pushback.</p>
+                    </div>
+                    <!-- 3 — SUPPLY RELIABILITY -->
+                    <div class="home-key-pillars_copy-item" data-copy="2">
+                      <h2 class="is-h-s is-text-deep-green home-key-pillars_heading">Built for continuity</h2>
+                      <p class="is-b-m home-key-pillars_paragraph">Coordinated manufacturing and distribution networks designed to keep supply steady, even at scale.</p>
+                    </div>
+                    <!-- 4 — PARTNERSHIP MODEL -->
+                    <div class="home-key-pillars_copy-item" data-copy="3">
+                      <h2 class="is-h-s is-text-deep-green home-key-pillars_heading">One point, <br>full orchestration</h2>
+                      <p class="is-b-m home-key-pillars_paragraph">A single accountable partner coordinating best-in-class development, manufacturing and commercial supply &mdash; so partners can focus on getting products to market.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <a href="#" class="home-key-pillars_cta">
+                  <span class="is-b-s is-emphasis is-text-lab-white home-key-pillars_cta-label">Work with us</span>
+                </a>
+              </div>
+
+              <div class="home-key-pillars_steps">
+                <button class="home-key-pillars_step is-active" data-step="0" type="button">
+                  <span class="home-key-pillars_step-line" aria-hidden="true"></span>
+                  <span class="home-key-pillars_step-row">
+                    <span class="home-key-pillars_step-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="is-caption home-key-pillars_step-label" data-reveal="pillars">Market Reach</span>
+                  </span>
+                </button>
+                <button class="home-key-pillars_step" data-step="1" type="button">
+                  <span class="home-key-pillars_step-line" aria-hidden="true"></span>
+                  <span class="home-key-pillars_step-row">
+                    <span class="home-key-pillars_step-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="is-caption home-key-pillars_step-label" data-reveal="pillars">Regulatory, IP &amp; Quality</span>
+                  </span>
+                </button>
+                <button class="home-key-pillars_step" data-step="2" type="button">
+                  <span class="home-key-pillars_step-line" aria-hidden="true"></span>
+                  <span class="home-key-pillars_step-row">
+                    <span class="home-key-pillars_step-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="is-caption home-key-pillars_step-label" data-reveal="pillars">Supply Reliability</span>
+                  </span>
+                </button>
+                <button class="home-key-pillars_step" data-step="3" type="button">
+                  <span class="home-key-pillars_step-line" aria-hidden="true"></span>
+                  <span class="home-key-pillars_step-row">
+                    <span class="home-key-pillars_step-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 6h9M6.5 2.5 10 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="is-caption home-key-pillars_step-label" data-reveal="pillars">Partnership Model</span>
+                  </span>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- ===== PRAWA GRUPA (ring + pager) ===== -->
+            <div class="home-key-pillars_right">
+
+              <div class="home-key-pillars_stage" aria-hidden="true">
+                <svg class="home-key-pillars_ring" viewBox="0 0 614 614" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle class="home-key-pillars_ring-track" cx="307" cy="307" r="306" />
+                  <circle class="home-key-pillars_ring-progress" cx="307" cy="307" r="306" />
+                </svg>
+                <div class="home-key-pillars_shape">
+                  <video class="home-key-pillars_video" src="assets/HELISA_3.mp4" muted playsinline preload="auto"></video>
+                </div>
+              </div>
+
+              <div class="home-key-pillars_pager" aria-hidden="true">
+                <span class="home-key-pillars_diamond"></span>
+                <div class="home-key-pillars_dots">
+                  <span class="home-key-pillars_dot is-active" data-dot="0"></span>
+                  <span class="home-key-pillars_dot" data-dot="1"></span>
+                  <span class="home-key-pillars_dot" data-dot="2"></span>
+                  <span class="home-key-pillars_dot" data-dot="3"></span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3) CONCEPT — „From concept to commercial supply" (node 4473:4517) ============
+         Ciemnozielony gradient. Dwa kształty (koło + kwadrat z wyciętym kołem) na scroll
+         schodzą się do środka — koło wchodzi w otwór — koniec na bottom bottom, BEZ sticky (100vh).
+         Tekst „From concept…" = data-reveal="concept" → ręczny revealOnScroll w initConcept
+         (home-full boot NIE woła globalnego initReveals). -->
+    </div>
+    <!-- /BLOK key-pillars -->
+
+    <section class="section is-home-concept" data-nav-theme="dark">
+      <div class="home-concept_pin">
+
+        <!-- tło gradientu — 120vh, w środku pina (nieruchome); na scroll jedzie −20vh w górę -->
+        <div class="home-concept_bg" aria-hidden="true"></div>
+
+        <div class="home-concept_shapes" aria-hidden="true">
+          <div class="home-concept_circle"></div>
+          <svg class="home-concept_square" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path class="home-concept_square-fill" fill-rule="evenodd"
+              d="M41.667 0 H458.333 A41.667 41.667 0 0 1 500 41.667 V458.333 A41.667 41.667 0 0 1 458.333 500 H41.667 A41.667 41.667 0 0 1 0 458.333 V41.667 A41.667 41.667 0 0 1 41.667 0 Z
+                 M250 11 a239 239 0 1 0 0 478 a239 239 0 1 0 0 -478 Z" />
+            <rect x="0.5" y="0.5" width="499" height="499" rx="41.667" class="home-concept_square-stroke" />
+            <circle cx="250" cy="250" r="239" class="home-concept_square-stroke" />
+          </svg>
+        </div>
+
+        <div class="home-concept_copy">
+          <h2 class="is-h-l is-text-lab-white home-concept_heading" data-reveal="concept">From concept <br>to commercial supply</h2>
+          <p class="is-t-s home-concept_subheading" data-reveal="concept">We cover full biosimilar lifecycle</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ 4) CTA — „The right partner changes everything" (Figma 4473:4736) ============
+         Ciemny gradient + DWA okręgi tła (1:1 z Figmy), interakcja: startują lekko oddalone,
+         dojeżdżają do pozycji z Figmy gdy sekcja się pojawia → jest pełna (initCta).
+         Butelka i navbar z Figmy POMINIĘTE (decyzja Tomka). Tekst = data-reveal="cta"
+         (ręcznie w initCta — home-full nie woła initReveals). Sekcja jest CIEMNA;
+         nav jest już biały (initConceptNavTheme z poprzedniej, ciemnej sekcji). -->
+
+    <!-- ===== SEKCJE Z WEBFLOW (build Maćka) — wstrzyknięte po home-concept. Style: home-webflow-sections/style.scoped.css (scoped .wf-home) ===== -->
+    <div class="wf-home">
+      <section class="section is-dark is-100dvh">
+        <div class="w-layout-blockcontainer container w-container">
+          <div class="how-wrapper">
+            <div class="how_grid grid-custom">
+              <div class="how_grid_col1">
+                <div class="content_wrap">
+                  <div data-wf--eyebrow--variant="base" class="eyebrow-wrappper">
+                    <div class="eyebrow_dot"></div>
+                    <div class="eyebrow_text is-caption">how it works</div>
+                  </div>
+                  <h2 class="content_heading is-h-s" data-reveal>We cover the full biosimilar lifecycle</h2>
+                  <p class="content_p is-b-m is-text-o50">Momentum doesn&#x27;t stall at the transitions that matter most.</p><button id="" class="button-element">
+                    <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="base" class="primary-button">
+                      <div>Work with us</div>
+                    </div>
+                  </button>
+                </div>
+                <div class="how_grid_visual"><img src="../home-webflow-sections/images/how_image.png" loading="lazy" sizes="(max-width: 636px) 100vw, 636px" srcset="../home-webflow-sections/images/how_image-p-500.png 500w, ../home-webflow-sections/images/how_image.png 636w" alt="" class="how_grid_img img-global"></div>
+              </div>
+              <div class="how_grid_col2">
+                <div class="display-none w-embed">
+                  <style>
+.how_category_dot_txt, .how_category_row_nb {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+</style>
+                </div>
+                <div class="how_category_wrapper">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">1</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m" data-reveal>Development</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Designed for scale from day one</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">GMP manufacturing built for compliance</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Tech transfer managed end-to-end</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">1.4</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Clinical strategy, study planning, execution &amp; reporting</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="how_category_wrapper">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">2</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m" data-reveal>Regulatory</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">2.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">One unified regulatory strategy</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">2.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Dossier build for global submission.</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">2.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Inspection readiness from the start</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="how_category_wrapper">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">3</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m" data-reveal>Commercial supply</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">3.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Supply continuity built into the program</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">3.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Launch planning across global markets</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">3.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Operational risk managed proactively</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="how_category_wrapper is-last">
+                  <div class="how_category">
+                    <div class="how_category_divider"></div>
+                    <div class="how_category_dot">
+                      <div class="how_category_dot_svg"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                      <div class="how_category_dot_txt is-b-m">4</div>
+                    </div>
+                    <h3 class="how_category_title is-t-m" data-reveal>Lifecycle management</h3>
+                  </div>
+                  <div class="how_category_rows">
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">4.1</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Post-approval changes handled in-house</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">4.2</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Label extensions and process updates</p>
+                    </div>
+                    <div class="how_category_row">
+                      <div class="how_category_row_divider"></div>
+                      <div class="how_category_row_nb is-b-m is-text-o50">4.3</div>
+                      <p class="how_category_row_p is-b-m is-text-o50">Accountable long after launch</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section is-join" data-nav-theme="light">
+        <div class="w-layout-blockcontainer container is-grow w-container">
+          <div class="join_wrapper">
+            <div class="join_grid grid-custom">
+              <div class="join_grid_col1 grid-subgrid">
+                <div class="join_grid_col1_top">
+                  <div class="join_h2_wrapper">
+                    <h2 class="join_h2 is-h-m" data-reveal>Biosimilars don&#x27;t move themselves. <span class="span-no-wrap">People move</span> them. From molecule <span class="span-no-wrap">to end market.</span></h2>
+                  </div>
+                  <div class="join_p_wrapper">
+                    <p class="join_p is-b-m">If you are motivated by complex challenges and meaningful work, we invite you to join us.</p>
+                  </div><button id="" class="button-element">
+                    <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                      <div>View open positions</div>
+                    </div>
+                  </button>
+                </div>
+                <div id="w-node-b8783340-0810-d1f3-99c1-384959336ce2-906ca2f0" class="join_grid_col1_bottom">
+                  <div class="join_grid_col1_cta">
+                    <a href="#" class="elipse-cta w-inline-block"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 200 200" fill="none" stroke-width="1" class="elipse-cta_bg">
+                        <rect x="200" width="200" height="200" rx="96.0251" transform="rotate(90 200 0)" fill="currentColor"></rect>
+                      </svg>
+                      <div class="elipse-cta_txt is-t-s" data-reveal>Join us</div>
+                      <div class="elipse-cta_icon">
+                        <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                            <g clip-path="url(#clip0_4509_1233)">
+                              <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                            </g>
+                            <defs>
+                              <clippath id="clip0_4509_1233">
+                                <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                              </clippath>
+                            </defs>
+                          </svg></div>
+                      </div>
+                      <div class="elipse-cta_square"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                          <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                        </svg></div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="join_grid_col2">
+                <div class="join_grid_col2_divider"></div>
+                <div class="join_grid_visual"><img src="../home-webflow-sections/images/join_img.webp" loading="lazy" sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 900px" srcset="../home-webflow-sections/images/join_img-p-500.webp 500w, ../home-webflow-sections/images/join_img-p-800.webp 800w, ../home-webflow-sections/images/join_img.webp 900w" alt="" class="join_grid_visual_img img-global"></div>
+                <div>
+                  <p>Our people are at the heart  of our success.  <br><br>We bring together scientists, engineers, quality experts, and business professionals who share a commitment to excellence and patient impact.</p>
+                </div>
+              </div>
+              <div class="join_grid_cta-mobile">
+                <a href="#" class="elipse-cta w-inline-block"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 200 200" fill="none" stroke-width="1" class="elipse-cta_bg">
+                    <rect x="200" width="200" height="200" rx="96.0251" transform="rotate(90 200 0)" fill="currentColor"></rect>
+                  </svg>
+                  <div class="elipse-cta_txt is-t-s" data-reveal>Join us</div>
+                  <div class="elipse-cta_icon">
+                    <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                        <g clip-path="url(#clip0_4509_1233)">
+                          <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                        </g>
+                        <defs>
+                          <clippath id="clip0_4509_1233">
+                            <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                          </clippath>
+                        </defs>
+                      </svg></div>
+                  </div>
+                  <div class="elipse-cta_square"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 34 34" fill="none" class="square-45">
+                      <rect x="16.7578" y="-1.89453" width="26.3812" height="26.3812" rx="4.57665" transform="rotate(45 16.7578 -1.89453)" fill="currentColor"></rect>
+                    </svg></div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section is-pipeline">
+        <div class="w-layout-blockcontainer container w-container">
+          <div class="pipeline_wrapper">
+            <div data-wf--header-centered-dividers--variant="base" class="header_wrapper">
+              <div class="display-none w-embed">
+                <style>
+  .header_divider + .header_divider {
+  margin-left: -1px;
+}
+</style>
+              </div>
+              <div class="header_dividers-top">
+                <div class="header_divider"></div>
+                <div class="header_divider"></div>
+              </div>
+              <div class="header_content">
+                <h2 class="header_heading is-h-l" data-reveal>Biosimilars pipeline</h2>
+                <p class="header_p is-t-s is-text-black button-element is-text-o50" data-reveal>Molecules that support long-term economic sustainability.</p>
+              </div>
+              <div class="header_dividers-bottom">
+                <div class="header_divider"></div>
+                <div class="header_divider"></div>
+              </div>
+            </div>
+            <div class="pipeline_table">
+              <div class="display-none w-embed">
+                <style>
+  /* Tablet: 768px–991px */
+  @media (min-width: 48rem) and (max-width: 61.9375rem) {
+    .pipeline_table_header_grid,
+    .pipeline_table_row {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.1fr)
+        minmax(0, 1.1fr)
+        minmax(0, 1fr)
+        minmax(0, 0.8fr)
+        minmax(0, 1fr)
+        minmax(7.5rem, auto);
+      align-items: center;
+      column-gap: 0.75rem;
+    }
+    .pipeline_table_header_grid > *,
+    .pipeline_table_row > * {
+      min-width: 0;
+    }
+    .pipeline_table_row > :last-child {
+      justify-self: end;
+      white-space: nowrap;
+    }
+  }
+  /* Desktop: od 992px */
+  @media (min-width: 62rem) {
+    .pipeline_table_header_grid,
+    .pipeline_table_row {
+      display: grid;
+      grid-template-columns:
+        minmax(11.25rem, 1.1fr)
+        minmax(11.25rem, 1.1fr)
+        minmax(11.25rem, 1fr)
+        minmax(8.75rem, 0.8fr)
+        minmax(11.25rem, 1fr)
+        minmax(9rem, auto);
+      align-items: center;
+      column-gap: 0.75rem;
+    }
+    .pipeline_table_row > :last-child {
+      justify-self: end;
+      white-space: nowrap;
+    }
+  }
+</style>
+              </div>
+              <div class="pipeline_table_header">
+                <div class="pipeline_table_header_grid">
+                  <div class="pipeline_table_header_cell is-1">
+                    <div class="pipeline_table_header_cell_txt is-caption">Program</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Reference drug</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Therapeutic area</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Status</div>
+                  </div>
+                  <div class="pipeline_table_header_cell">
+                    <div class="pipeline_table_header_cell_txt is-caption">Partner</div>
+                  </div>
+                </div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Ranibizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Lucentis® (Novartis)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Ophthalmology</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">Commercialized</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Teva, Zydus</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Natalizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Tysabri® (Biogen)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Multiple sclerosis</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">Commercialized</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Sandoz</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Vedolizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Lucentis® (Novartis)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Ophthalmology</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">Commercialized</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Teva, Zydus</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Ocrelizumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Tysabri® (Biogen)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Multiple sclerosis</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">In development</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Sandoz</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+              <div class="pipeline_table_row_wrapper">
+                <div class="pipeline_table_row_border-top"></div>
+                <div class="pipeline_table_row_border-desktop"></div>
+                <div class="pipeline_table_row">
+                  <div class="pipeline_table_row_cell is-header-mobile">
+                    <div class="pipeline_table_row_cell_left">
+                      <div class="pipeline_table_row_cell_dot"></div>
+                      <div class="pipeline_table_row_txt is-b-m">Guselkumab</div>
+                    </div>
+                    <div class="pipeline_table_row_btn">
+                      <a href="#" class="ic-button w-inline-block">
+                        <div class="ic-button_icon">
+                          <div class="icon-global"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewbox="0 0 20 20" fill="none" stroke-width="1" class="u-svg">
+                              <g clip-path="url(#clip0_4509_1233)">
+                                <path d="M10.7197 3.84467C11.0126 3.55178 11.4874 3.55178 11.7803 3.84467L17.4053 9.46967C17.5459 9.61032 17.625 9.80103 17.625 9.99994C17.625 10.1989 17.5459 10.3896 17.4053 10.5302L11.7803 16.1552C11.4874 16.4481 11.0126 16.4481 10.7197 16.1552C10.4268 15.8623 10.4268 15.3876 10.7197 15.0947L15.0645 10.7499H3.125C2.71079 10.7499 2.375 10.4142 2.375 9.99994C2.375 9.58573 2.71079 9.24994 3.125 9.24994H15.0645L10.7197 4.90522C10.4268 4.61232 10.4268 4.13756 10.7197 3.84467Z" fill="currentColor" stroke-width="1"></path>
+                              </g>
+                              <defs>
+                                <clippath id="clip0_4509_1233">
+                                  <rect width="20" height="20" fill="currentColor" transform="translate(8.74228e-07 20) rotate(-90)"></rect>
+                                </clippath>
+                              </defs>
+                            </svg></div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="pipeline_table_row_border-mobile"></div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Reference Drug</div>
+                    <div class="pipeline_table_row_txt is-b-m">Tysabri® (Biogen)</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Therapeutic area</div>
+                    <div class="pipeline_table_row_txt is-b-m">Multiple sclerosis</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">Status</div>
+                    <div class="pipeline_table_row_txt is-b-m">In development</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-black">
+                    <div class="pipline_table_row_label is-caption">partner</div>
+                    <div class="pipeline_table_row_txt is-b-m">Sandoz</div>
+                  </div>
+                  <div class="pipeline_table_row_cell is-cta">
+                    <a href="#" class="readmore_wrapper w-inline-block">
+                      <div class="readmore_dots">
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                        <div class="readmore_dot"></div>
+                      </div>
+                      <div class="is-b-m">Read more</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="pipeline_table_row_divider"></div>
+              </div>
+            </div>
+            <div class="pipeline_logos_wrapper">
+              <div class="display-none w-embed">
+                <style>
+  .pipeline_table_row .pipeline_logo_wrap + .pipeline_logo_wrap {
+    margin-left: -1px;
+  }
+</style>
+              </div>
+              <div class="pipeline_logos_label is-caption">trusted worldwide</div>
+              <div class="pipeline_logos_grid">
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="../home-webflow-sections/images/logo_libbs.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="../home-webflow-sections/images/logo_sandoz.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="../home-webflow-sections/images/logo_ms-pharma.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="../home-webflow-sections/images/logo_fresenius.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="../home-webflow-sections/images/logo_tuteur.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+                <div class="pipeline_logo_wrap">
+                  <div class="pipeline_logo_border"></div>
+                  <div class="pipeline_logo_visual"><img loading="lazy" src="../home-webflow-sections/images/logo_teva.svg" alt="" class="pipeline_logo_svg img-global"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section is-padding-off">
+        <div class="w-layout-blockcontainer container w-container">
+          <div class="meet_wrapper">
+            <div data-wf--header-1--variant="base" class="header-1_wrapper">
+              <h2 class="header-1_heading is-h-m" data-reveal>Meet the team of experts<br>behind every program</h2>
+              <div class="header-1_p_wrapper">
+                <p class="header-1_p is-t-s is-text-o50 is-text-black" data-reveal>Deep expertise. Lean by intention.</p>
+              </div>
+              <div class="header-1_btn_wrapper"></div>
+            </div>
+            <div class="meet_swiper">
+              <div data-swiper-autoplay-disable-on-interaction="false" data-swiper-slides-landscape="2" class="swiper_wrap" data-swiper-slides-desktop="4" data-swiper-gap="var(--_grid---grid-gap)" data-swiper-centered="true" data-swiper-drag="true" data-swiper-autoplay-reverse="false" data-swiper-autoplay-delay="3000" data-swiper-rewind="false" data-swiper-autoplay-pause-on-mouse-enter="true" data-swiper-designer-fallback="true" data-swiper-autoplay="true" data-swiper-speed="1800" data-swiper-designer-width="25" data-swiper-loop="true" data-swiper-keyboard="true" data-swiper-slides-mobile="1.25" data-swiper-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-swiper-slides-tablet="2">
+                <div class="swiper_layout">
+                  <div class="swiper_component swiper">
+                    <div class="swiper_list swiper-wrapper">
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="../home-webflow-sections/images/meet_paco.webp" alt="" sizes="100vw" srcset="../home-webflow-sections/images/meet_paco-p-500.webp 500w, ../home-webflow-sections/images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="../home-webflow-sections/images/meet_paco.webp" alt="" sizes="100vw" srcset="../home-webflow-sections/images/meet_paco-p-500.webp 500w, ../home-webflow-sections/images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="../home-webflow-sections/images/meet_paco.webp" alt="" sizes="100vw" srcset="../home-webflow-sections/images/meet_paco-p-500.webp 500w, ../home-webflow-sections/images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="../home-webflow-sections/images/meet_paco.webp" alt="" sizes="100vw" srcset="../home-webflow-sections/images/meet_paco-p-500.webp 500w, ../home-webflow-sections/images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="swiper_item swiper-slide">
+                        <div class="team-m_wrapper">
+                          <div class="team-m_square_wrapper"><img loading="lazy" src="../home-webflow-sections/images/meet_paco.webp" alt="" sizes="100vw" srcset="../home-webflow-sections/images/meet_paco-p-500.webp 500w, ../home-webflow-sections/images/meet_paco.webp 872w" class="team-m_img img-global"></div>
+                          <div class="team-m_info">
+                            <div class="team-m_info_txt is-b-l">Full Name</div>
+                            <div class="team-m_info_txt is-b-m">Role or position</div>
+                          </div><button id="" class="button-element">
+                            <div id="w-node-_884776b0-85d3-9a33-7cdb-0fd667feaf35-67feaf35" data-wf--button-ui--variant="alternate" class="primary-button w-variant-5d10aa60-c7e8-23fb-91fd-7d9775880402">
+                              <div>Linkedin</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper_pagination">
+                    <div id="" class="swiper_pagination_dot is-active"></div><button id="" class="swiper_pagination_dot"></button>
+                  </div>
+                </div>
+                <div class="swiper_hidden display-none"><button class="swiper_button_wrap is-disabled"></button><button class="swiper_button_wrap is-locked"></button>
+                  <div class="swiper_component is-dragging"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+    </div>
+
+    <!-- ============ INSIGHTS (slider + parallax) ============
+         Świadomie POZA `.wf-home`: scoped CSS Maćka nadpisuje tam
+         `.section` padding i `.container` max-width, co rozjechałoby
+         wyrównanie kart do krawędzi kontenera. -->
+    <!-- ============================================================
+         INSIGHTS — Figma node 4473:4434 (fileKey eamVOAaNZDwHQKofLeV2Il)
+         Slider: swiper 12, free-mode drag, przycięty w prawo (bleed).
+         Taby (All insights / Company news / …) — POMINIĘTE (decyzja Tomka).
+         ============================================================ -->
+    <!-- data-nav-theme="light" (2026-07-28): sekcja MA białe tło, więc jest realnym stykiem
+         motywu nawigacji. Na desktopie to no-op — poprzedni styk (.is-join) już ustawił
+         „light", a nav-v2 zapisuje styk tylko tam, gdzie motyw się ZMIENIA. Na ≤991
+         `.is-join` jest schowana i wypada ze styków, więc bez tego atrybutu nav zostawałby
+         w stanie ciemnej sekcji (concept) i byłby BIAŁY NA BIAŁYM przez całe insights. -->
+    <section class="section is-home-insights" data-nav-theme="light">
+
+      <!-- dekor: dwa panele z obrysem, przycięte u góry sekcji (Figma 4473:4436) -->
+      <div class="container">
+        <div class="home-insights_decor" aria-hidden="true">
+          <div class="home-insights_decor-panel"></div>
+          <div class="home-insights_decor-panel"></div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="home-insights_head">
+          <h2 class="is-h-l is-text-deep-green home-insights_heading">Insights</h2>
+        </div>
+      </div>
+
+      <!-- Slider siedzi W KONTENERZE — tak jak heading i dekor. Box slidera = box
+           kontenera, więc przy skrajnym przewinięciu w prawo prawa krawędź ostatniej
+           karty równa się prawej krawędzi kontenera (nie okna).
+           Karty wystające poza kontener są widoczne (slider ma overflow: visible)
+           i przycina je dopiero SEKCJA (overflow-x: clip). -->
+      <div class="container">
+        <div class="home-insights_slider swiper">
+          <div class="home-insights_list swiper-wrapper">
+
+            <!-- ── karta 1 — light ───────────────────────────────── -->
+            <article class="home-insights_card is-light swiper-slide">
+              <a href="#" class="home-insights_card-link">
+                <div class="home-insights_card-top">
+                  <div class="home-insights_date" data-lag-group="date">
+                    <span class="is-caption" data-lag>22</span>
+                    <span class="home-insights_date-dot" data-lag></span>
+                    <span class="is-caption" data-lag>10</span>
+                    <span class="is-caption" data-lag>2026</span>
+                  </div>
+                  <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Company expands biosimilar pipeline with new oncology candidate</h3>
+                </div>
+
+                <div class="home-insights_card-bottom" data-lag-group="shapes">
+                  <!-- element 1 (parallax: dogania szybciej) -->
+                  <div class="home-insights_media" data-lag>
+                    <img class="home-insights_media-img" src="../home-insights/assets/insights-lab.png" alt="" />
+                  </div>
+
+                  <!-- element 2 (parallax: dogania później) -->
+                  <div class="home-insights_more" data-lag>
+                    <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                      <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                    </svg>
+                    <span class="home-insights_more-label">
+                      <span class="is-t-s">More</span>
+                      <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+            <!-- ── karta 2 — dark gradient ───────────────────────── -->
+            <article class="home-insights_card is-dark swiper-slide">
+              <a href="#" class="home-insights_card-link">
+                <div class="home-insights_card-top">
+                  <div class="home-insights_date" data-lag-group="date">
+                    <span class="is-caption" data-lag>08</span>
+                    <span class="home-insights_date-dot" data-lag></span>
+                    <span class="is-caption" data-lag>10</span>
+                    <span class="is-caption" data-lag>2026</span>
+                  </div>
+                  <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Physician guide to biosimilar adoption and switching</h3>
+                </div>
+
+                <div class="home-insights_card-bottom" data-lag-group="shapes">
+                  <div class="home-insights_media" data-lag></div>
+                  <div class="home-insights_more" data-lag>
+                    <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                      <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                    </svg>
+                    <span class="home-insights_more-label">
+                      <span class="is-t-s">More</span>
+                      <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+            <!-- ── karta 3 — vibrant ─────────────────────────────── -->
+            <article class="home-insights_card is-vibrant swiper-slide">
+              <a href="#" class="home-insights_card-link">
+                <div class="home-insights_card-top">
+                  <div class="home-insights_date" data-lag-group="date">
+                    <span class="is-caption" data-lag>16</span>
+                    <span class="home-insights_date-dot" data-lag></span>
+                    <span class="is-caption" data-lag>9</span>
+                    <span class="is-caption" data-lag>2026</span>
+                  </div>
+                  <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Professionals who share a commitment to excellence and patient impact.</h3>
+                </div>
+
+                <div class="home-insights_card-bottom" data-lag-group="shapes">
+                  <div class="home-insights_media" data-lag>
+                    <img class="home-insights_media-object" src="../home-insights/assets/insights-vial.png" alt="" />
+                  </div>
+                  <div class="home-insights_more" data-lag>
+                    <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                      <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                    </svg>
+                    <span class="home-insights_more-label">
+                      <span class="is-t-s">More</span>
+                      <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+            <!-- ── karta 4 — light (dodatkowa, żeby było co ciągnąć) ── -->
+            <article class="home-insights_card is-light swiper-slide">
+              <a href="#" class="home-insights_card-link">
+                <div class="home-insights_card-top">
+                  <div class="home-insights_date" data-lag-group="date">
+                    <span class="is-caption" data-lag>02</span>
+                    <span class="home-insights_date-dot" data-lag></span>
+                    <span class="is-caption" data-lag>9</span>
+                    <span class="is-caption" data-lag>2026</span>
+                  </div>
+                  <h3 class="is-t-l home-insights_title" data-lag-group="title" data-lag>Manufacturing capacity milestone reached at Duchnice site</h3>
+                </div>
+
+                <div class="home-insights_card-bottom" data-lag-group="shapes">
+                  <div class="home-insights_media" data-lag>
+                    <img class="home-insights_media-img" src="../home-insights/assets/insights-lab.png" alt="" />
+                  </div>
+                  <div class="home-insights_more" data-lag>
+                    <svg class="home-insights_more-shape" viewBox="0 0 190 190" aria-hidden="true">
+                      <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M24 0H166A24 24 0 0 1 190 24V166A24 24 0 0 1 166 190H24A24 24 0 0 1 0 166V24A24 24 0 0 1 24 0ZM95 4A91 91 0 1 0 95 186A91 91 0 1 0 95 4Z" />
+                    </svg>
+                    <span class="home-insights_more-label">
+                      <span class="is-t-s">More</span>
+                      <svg class="home-insights_more-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M4 10H16M16 10L10.5 4.5M16 10L10.5 15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section is-home-cta" data-nav-theme="dark">
+      <div class="home-cta_bg" aria-hidden="true"></div>
+      <!-- dwa okręgi tła (1:1 z Figmy: 1059px, wyśrodkowane; góra top:-388, dół top:495) -->
+      <div class="home-cta_circle is-top" aria-hidden="true"></div>
+      <div class="home-cta_circle is-bottom" aria-hidden="true"></div>
+
+      <div class="container">
+        <div class="home-cta_component">
+          <div class="home-cta_copy">
+            <h2 class="is-h-l is-text-lab-white home-cta_heading" data-reveal="cta">The right partner changes everything</h2>
+            <p class="is-b-l home-cta_subtitle" data-reveal="cta">Our partnerships are built on trust, ownership,<br>and long-term commitment.</p>
+          </div>
+          <a href="#" class="home-cta_cta">
+            <span class="is-b-s is-emphasis is-text-deep-green home-cta_cta-label">Let&rsquo;s build together</span>
+          </a>
+        </div>
+      </div>
+    </section>
+    <!-- ============ FOOTER BOTTLE REVEAL — OSTATNIA sekcja (sekwencja butelki + taśma wideo) ============
+         Butelka (16 PNG) absolutem NAD sekcją wyżej (CTA); dół butelki = górna krawędź wideo.
+         Scrub sekwencji + widea = initFooterBottleReveal (key-pillars.js); video-scrub.js z _shared. -->
+    <section class="section is-footer-bottle-reveal">
+      <div class="footer-bottle-reveal_video-wrap">
+        <!-- klatkę startową i katalog sekwencji ustawia JS (CONFIG.bottle.seqDir) -->
+        <img class="footer-bottle-reveal_bottle" alt="" src="assets/sequence-2x/top_00.png">
+        <!-- KLIP TAŚMY — na mobile wideo jest powiększane i przycinane do środka.
+             ⚠️ overflow:hidden MUSI siedzieć tutaj, a nie na _video-wrap: butelka jest
+             pozycjonowana NAD wrapem (bottom:100%), więc klip na wrapie by ją uciął. -->
+        <div class="footer-bottle-reveal_video-clip">
+          <!-- 2880×1600 = retina 2× dla layoutu 1440 (poprzedni plik był 1440×800 = upscale na Macu).
+               ⚠️ preload="metadata", NIE "auto": createVideoScrub i tak pobiera cały plik fetchem
+               do bloba, więc przy "auto" leci drugie, równoległe pobranie tego samego pliku. -->
+          <video class="footer-bottle-reveal_video" src="assets/tasma-2880-g1.mp4" muted playsinline preload="metadata"></video>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ SITE FOOTER (globalny, _shared/site-footer) ============ -->
+  <footer class="section is-site-footer">
+    <div class="container">
+      <div class="site-footer_component">
+
+        <!-- ---------- KSZTAŁTY (brand mark: koło + kwadrat z wyciętym kołem) ----------
+             Desktop: kwadrat po lewej, koło po prawej (kolejność DOM).
+             Mobile: odwrócone (row-reverse) — koło przy krawędzi, kwadrat obok.
+             Na scroll rozjeżdżają się ze stanu koncentrycznego do docelowego. -->
+        <div class="site-footer_shapes" aria-hidden="true">
+          <svg class="site-footer_square" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- pierścień (kwadrat − koło), fill-rule evenodd -->
+            <path class="site-footer_shape-fill" fill-rule="evenodd"
+              d="M18.333 0 H201.667 A18.333 18.333 0 0 1 220 18.333 V201.667 A18.333 18.333 0 0 1 201.667 220 H18.333 A18.333 18.333 0 0 1 0 201.667 V18.333 A18.333 18.333 0 0 1 18.333 0 Z
+                 M110 5 a105 105 0 1 0 0 210 a105 105 0 1 0 0 -210 Z" />
+            <rect x="0.5" y="0.5" width="219" height="219" rx="18.333" class="site-footer_shape-stroke" />
+            <circle cx="110" cy="110" r="105" class="site-footer_shape-stroke" />
+          </svg>
+          <div class="site-footer_circle"></div>
+        </div>
+
+        <!-- ---------- KOLUMNA TREŚCI ---------- -->
+        <div class="site-footer_col">
+
+          <!-- Headquaters -->
+          <div class="site-footer_hq">
+            <p class="is-t-s site-footer_hq-title" data-reveal="site-footer">Headquaters</p>
+            <!-- ⚠️ is-text-o50 MUSI siedzieć na RODZICU, nie na elemencie z data-reveal:
+                 revealText() ustawia inline autoAlpha=1, które skasowałoby opacity 0.5 -->
+            <address class="is-text-o50 site-footer_hq-address">
+              <p class="is-b-m" data-reveal="site-footer">
+                Polpharma Biologics International AG,<br />
+                Erlenring 2, 6343 Rotkreuz, Switzerland<br />
+                <a href="mailto:office@polpharmabiologics.com">office@polpharmabiologics.com</a>
+              </p>
+            </address>
+          </div>
+
+          <!-- nawias górny -->
+          <div class="site-footer_rule" data-rule-reveal aria-hidden="true"></div>
+
+          <!-- nawigacja -->
+          <nav class="site-footer_nav" aria-label="Footer">
+            <ul class="site-footer_links">
+              <li><a class="is-t-s site-footer_link" href="/about-us"      data-reveal="site-footer">About us</a></li>
+              <li><a class="is-t-s site-footer_link" href="/what-we-do"    data-reveal="site-footer">What we do</a></li>
+              <li><a class="is-t-s site-footer_link" href="/partnerships"  data-reveal="site-footer">Partnerships</a></li>
+              <li><a class="is-t-s site-footer_link" href="/insights"      data-reveal="site-footer">Insights</a></li>
+              <li><a class="is-t-s site-footer_link" href="/careers"       data-reveal="site-footer">Careers</a></li>
+            </ul>
+            <!-- is-text-o50 na <li> (rodzic) — patrz uwaga przy adresie -->
+            <ul class="site-footer_legal">
+              <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="#"               data-reveal="site-footer">Cookie center</a></li>
+              <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="/terms-of-use"   data-reveal="site-footer">Terms of use</a></li>
+              <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="/imprint"        data-reveal="site-footer">Imprint</a></li>
+              <li class="is-text-o50"><a class="is-b-m site-footer_legal-link" href="/privacy-policy" data-reveal="site-footer">Privacy policy</a></li>
+            </ul>
+          </nav>
+
+          <!-- nawias dolny + stopka prawna (dosuwane do dołu) -->
+          <div class="site-footer_bottom">
+            <div class="site-footer_rule is-flipped" data-rule-reveal aria-hidden="true"></div>
+            <!-- is-text-o50 na wierszu (rodzic) — patrz uwaga przy adresie -->
+            <div class="is-text-o50 site-footer_meta">
+              <p class="is-b-m site-footer_meta-item" data-reveal="site-footer">© Polpharma Biologics<span class="site-footer_rights">. All rights reserved.</span></p>
+              <p class="is-b-m site-footer_meta-item" data-reveal="site-footer">Made by Widelab</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ FEATURE SHAPE (site-level overlay — TYLKO do handoffu) ============
+       Pojawia się na końcu wideo, przeżywa najazd białej sekcji; na starcie pinu
+       We know jest podmieniany na kopie żyjące w sekcji (patrz home-we-know_shape). -->
+  <div class="feature-shape_component" aria-hidden="true">
+    <img class="feature-shape_svg" src="assets/shape.svg" alt="" />
+    <img class="feature-shape_bottle is-sharp" src="assets/bottle-v3.png" alt="" />
+  </div>
+
+  </div><!-- koniec kontenera strony -->
+  </div><!-- koniec wrappera -->
+
+  <!-- ============================================================
+       FLAGA HARNESSU — MUSI być przed modułami stron i sekcji.
+       Każdy z nich ma fallback „standalone" (własny listener load) na wypadek
+       otwarcia pliku poza tym harnessem; ta flaga go wyłącza, bo tutaj
+       wywołania robi transition.js przez PPB.pages[namespace].init().
+       ============================================================ -->
+  <script>window.__PPB_BARBA__ = true;</script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <!-- SplitText (od GSAP 3.13 darmowy) — dzieli teksty na linie pod globalny line-reveal;
+       jsdelivr = lustro npm (cdnjs nie hostuje wszystkich pluginów) -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <!-- warstwa globalna (_shared): config + system #1 (reveal) + nav (generator kształtu, maska #2) -->
+  <script src="../_shared/gsap-config.js"></script>
+  <script src="../_shared/reveal.js?v=20260728-sf1"></script>
+  <script src="../_shared/highlight.js"></script>   <!-- system #4: scroll highlight -->
+  <script src="../_shared/swap.js"></script>
+  <script src="nav-v2.js?v=20260729-081453"></script> <!-- NAV v2: klon maski + arbiter motywu; PRZED nav-shape/nav-menu -->
+  <script src="../_shared/nav/nav-shape.js"></script>
+  <script src="../_shared/nav/nav-menu.js"></script>
+  <script src="../_shared/nav/nav-mask.js"></script>
+  <!-- globalny footer serwisu (initSiteFooter() wołany w masterze w script.js) -->
+  <script src="../_shared/site-footer/site-footer.js"></script>
+  <!-- silnik hero: line reveal + water na canvasie WebGL (start po loaderze z script.js) -->
+  <!-- Unicorn Studio (oficjalny snippet, v2.1.9) -->
+  <script type="text/javascript">!function(){var u=window.UnicornStudio;if(u&&u.init){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){u.init()})}else{u.init()}}else{window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.9/dist/unicornStudio.umd.js",i.onload=function(){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){UnicornStudio.init()})}else{UnicornStudio.init()}},(document.head||document.body).appendChild(i)}}();</script>
+  <!-- Lottie loadera (01D) — lib (CDN) + dane inline window.LOADER_01D, PRZED script.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <script src="loader-01d.js?v=20260729-081453"></script>
+  <script src="script.js?v=20260729-081453"></script>
+  <!-- KEY PILLARS (merge) — choreografia doklejonych sekcji; PO script.js (osobny IIFE, własny load-listener) -->
+  <!-- video-scrub (footer bottle reveal) — createVideoScrub PRZED key-pillars.js -->
+  <script src="../_shared/video-scrub.js"></script>
+  <script src="key-pillars.js?v=20260729-081453"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+  <!-- Meet the team — było inline'em na dole strony; Barba nie wykonuje skryptów
+       z podmienianego kontenera, więc slider musiał dostać init/destroy -->
+  <script src="meet-swiper.js?v=20260729-081453"></script>
+  <!-- INSIGHTS — kopia lokalna ../home-insights/script.js z init/destroy
+       (oryginał odpala się przy parsowaniu). Panel strojenia OFF (brak data-lag-tune) -->
+  <script src="insights.js?v=20260729-081453"></script>
+
+  <!-- ============================================================
+       MODUŁY POZOSTAŁYCH STRON (audyt 2026-07-29).
+       Barba NIE wykonuje skryptów z podmienianego dokumentu — okno ma na
+       zawsze tylko skrypty strony WEJŚCIOWEJ. Bez about.js i track-record
+       przejście home→about dawało MARTWĄ stronę: `[ppb] brak modułu strony
+       dla namespace: about`, wszystkie [data-reveal] ukryte (FOUC guard),
+       0 ScrollTriggerów — zmierzone headlessem. Dlatego OBA HTML-e ładują
+       IDENTYCZNĄ, pełną listę modułów (pilnuje tego verify.js, sekcja 4e).
+       ============================================================ -->
+  <script src="about.js?v=20260729-081453"></script>
+  <script src="../track-record/script.js"></script>
+
+  <!-- ============================================================
+       WARSTWA TRWAŁA: smooth scroll + page transitions.
+       Kolejność ma znaczenie — Lenis inicjalizuje się RAZ i żyje poza Barbą,
+       transition.js na końcu, bo `once()` odpala pierwszą stronę.
+       ⚠️ Barba wymaga serwera HTTP (fetch kolejnej strony).
+       ============================================================ -->
+  <script src="vendor/lenis.min.js"></script>
+  <script src="vendor/barba.umd.js"></script>
+  <script src="smooth-lenis.js?v=20260729-081453"></script>
+  <script src="transition.js?v=20260729-081453"></script>
+</body>
+</html>

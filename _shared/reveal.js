@@ -105,17 +105,42 @@
   function revealOnScroll(trigger, targets, opts) {
     opts = opts || {};
     var r = cfg();
+
+    /* GUARD „już pokazane" (2026-07-28, zgłoszenie Tomka).
+       Wersja bidirectional ma DWA markery: reveal na `start` (domyślnie "top 75%")
+       i hide dopiero na `hideStart` ("top bottom"). Między nimi jest strefa, w której
+       element JEST widoczny, a `onEnter` może odpalić ponownie: wystarczy cofnąć scroll
+       tak, żeby element zszedł poniżej 75 % (nic się wtedy nie chowa — i słusznie),
+       a potem zjechać z powrotem. Bez `once` (bo bidirectional go wyłącza) `onEnter`
+       leci drugi raz i `revealText` startuje `fromTo` spod maski — czyli tekst na
+       oczach użytkownika ZNIKA i wjeżdża jeszcze raz.
+
+       Rozwiązanie: reveal pamięta, że jest pokazany; kasuje tę pamięć dopiero hide,
+       czyli moment, w którym element naprawdę zniknął z ekranu. To ten sam wzorzec,
+       który initKeyPillars ma u siebie lokalnie (flaga `shown` + `resetEntry`) —
+       tutaj trafia do wspólnej warstwy, więc obowiązuje wszystkie reveale na stronie.
+       Zachowanie w normalnym przebiegu (pokaż → zejdź z ekranu → pokaż znowu)
+       jest bez zmian; znika WYŁĄCZNIE zbędne powtórzenie. */
+    var shown = false;
+
     var stReveal = ScrollTrigger.create({
       trigger: trigger,
       start: opts.start || r.start,
       once: !opts.bidirectional,
-      onEnter: function () { revealText(targets, opts); },
+      onEnter: function () {
+        if (shown) return;
+        shown = true;
+        revealText(targets, opts);
+      },
     });
     if (opts.bidirectional) {
       ScrollTrigger.create({
         trigger: trigger,
         start: opts.hideStart || r.hideStart || "top bottom",
-        onLeaveBack: function () { hideText(targets, opts); },
+        onLeaveBack: function () {
+          shown = false;
+          hideText(targets, opts);
+        },
       });
     }
     return stReveal;

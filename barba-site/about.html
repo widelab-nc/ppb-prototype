@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polpharma Biologics — About us [BARBA-SITE]</title>
+  <link rel="preload" href="../_shared/fonts/ConcretteM-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="../_shared/fonts/SeasonSans-Medium.woff2" as="font" type="font/woff2" crossorigin />
+
+  <!-- warstwa TRWAŁA (bez data-page-css) — musi być identyczna jak na home,
+       inaczej powrót na home zostawi arkusz, którego home nie oczekuje -->
+  <link rel="stylesheet" href="../_shared/styleguide.css" />
+  <link rel="stylesheet" href="../_shared/nav/nav.css" />
+  <link rel="stylesheet" href="../_shared/site-footer/site-footer.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
+  <!-- SKALA GLOBALNA — warstwa TRWAŁA, BEZ data-page-css.
+       Root font-size (drabinka fluid) + --container-gutter + padding nava.
+       Musi przeżyć podmianę arkuszy stron, inaczej nav (site-level, w rem)
+       zmienia rozmiar w połowie przejścia. Szczegóły w root-scale.css. -->
+  <link rel="stylesheet" href="root-scale.css?v=20260729-081453" />
+
+  <!-- warstwa STRONY — transition.js podmienia ją pod zasłoną wipe'a -->
+  <link rel="stylesheet" href="../track-record/style.css" data-page-css />   <!-- sekcja timeline (na razie na dole) -->
+  <link rel="stylesheet" href="about.css?v=20260729-081453" data-page-css />
+
+  <!-- BUG FIX 2026-07-28 (a) — patrz index.html: w <head>, nie na dole <body>,
+       bo przeglądarka przywraca scroll przed dojściem do skryptów końcowych -->
+  <script>if ("scrollRestoration" in history) history.scrollRestoration = "manual";</script>
+
+  <!-- BUG FIX 2026-07-28 (b) — reguła trzymana 1:1 z home. Na about loadera nie ma,
+       ale warstwa trwała musi być identyczna na obu stronach (patrz README). -->
+  <style>
+    /* 1:1 z index.html — warstwa trwała musi być identyczna na obu stronach.
+       Na about loader jest OBECNY w DOM (przyszedł z home jako element site-level),
+       tylko nieostylowany, bo `style.css` jest odpięty. Bez `position: fixed`
+       stawał się blokiem w flow i spychał layout w dół (biały prześwit). */
+    .loader_component.is-done { display: none !important; }
+    .loader_component { position: fixed; inset: 0; z-index: 100; }
+
+    /* 3. KONTENER STRONY = WŁASNY KONTEKST UKŁADANIA (2026-07-28).
+       Zasłona przejścia leży POD navem (z-index 40 < 50), żeby nav nigdy nie
+       znikał ani nie mrugał. Żeby to zadziałało, treść strony nie może się nad
+       zasłonę przebijać — a przebijałaby: sekcje Webflow mają `z-index: 2000`,
+       wskaźnik DEV na about `9999`. `isolation: isolate` zamyka je wszystkie
+       w kontekście o z-indeksie 0. Nie tworzy bloku zawierającego dla `fixed`
+       (to robi transform/filter), więc piny i sticky działają bez zmian.
+       Drabinka: treść (0) < zasłona (40) < nav (50) < maska (51) < menu (80/90) < loader (100). */
+    [data-barba="container"] { position: relative; z-index: 0; isolation: isolate; }
+  </style>
+</head>
+<body>
+
+  <!-- Wspólne defs dla navbara (inner shadow wariantu dark) — RAZ w DOM -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="navInnerShadow" color-interpolation-filters="sRGB">
+        <feColorMatrix in="SourceAlpha" type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+        <feOffset dx="-1.12875" dy="1.12875"/>
+        <feGaussianBlur stdDeviation="1.12875"/>
+        <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.15 0"/>
+        <feBlend mode="normal" in2="SourceGraphic"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- BEZ LOADERA na tej stronie (decyzja Tomka 2026-07-21) — reveal gra od razu po load -->
+
+  <!-- ============ NAV (site-level, fixed) — komponent globalny z projektu ============ -->
+  <header class="nav_component" data-reveal="ui" data-label="navbar">
+    <a href="index.html" class="nav_brand">
+      <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+    </a>
+    <nav class="nav_links-component is-dark-bg" aria-label="Main navigation">
+      <div class="nav_menu">
+        <div class="nav_menu-blur" aria-hidden="true"></div>
+        <svg class="nav_menu-bg" height="42" aria-hidden="true">
+          <path class="nav_menu-shape" d=""/>
+        </svg>
+        <span class="nav_drop">
+          <a href="#" class="nav_link is-b-s is-drop" aria-haspopup="true" aria-expanded="false">
+            Company
+            <svg class="nav_link-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+            </svg>
+          </a>
+          <div class="nav_dropdown" role="menu">
+            <a href="about.html" class="nav_dropdown-link is-b-s" role="menuitem">About us</a>
+            <a href="#" class="nav_dropdown-link is-b-s" role="menuitem">What we do</a>
+          </div>
+        </span>
+        <a href="#" class="nav_link is-b-s">Pipeline</a>
+        <a href="#" class="nav_link is-b-s">Partnerships</a>
+        <a href="#" class="nav_link is-b-s">Insights</a>
+        <a href="#" class="nav_link is-b-s">Careers</a>
+      </div>
+      <a href="#" class="nav_cta">
+        <span class="is-b-s is-emphasis is-text-lab-white">Contact</span>
+      </a>
+    </nav>
+
+    <!-- hamburger (≤991px) — czerwona pigułka, Figma 4473:6110 -->
+    <button class="nav_hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navMobile">
+      <span class="nav_hamburger-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+  </header>
+
+  <!-- ============ NAV MASK (system #2 v2) ============
+       Wrapper CELOWO PUSTY — 1:1 z home. Ciemną kopię nava generuje nav-v2.js
+       (cloneNode z bazowego nava). Ręczna kopia, która tu była, rozjeżdżała się
+       z bazowym navem (brak hamburgera) i była jednym z „czterech pisarzy"
+       clip-pathów, których arbiter v2 zastąpił.
+       Styk motywu deklaruje data-nav-theme="light" na .is-about-purpose. -->
+  <div class="nav-mask_component" aria-hidden="true"></div>
+
+  <!-- ============ MOBILE MENU (pełnoekranowy overlay, Figma 4473:6772) ============ -->
+  <div class="nav-mobile" id="navMobile" aria-hidden="true">
+    <div class="nav-mobile_bar">
+      <span class="nav_brand">
+        <img class="nav_brand-logo" src="../_shared/nav/logo-white.svg" alt="Polpharma Biologics" />
+      </span>
+      <button class="nav-mobile_close" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="nav-mobile_list" aria-label="Mobile navigation">
+      <a href="about.html" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">About us</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">What we do</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Pipeline</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Partnerships</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Insights</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Careers</span></a>
+      <a href="#" class="nav-mobile_link"><span class="nav-mobile_divider" aria-hidden="true"></span><span class="is-t-m">Contact</span></a>
+    </nav>
+    <a href="#" class="nav-mobile_cta">
+      <span class="nav-mobile_cta-dots" aria-hidden="true"></span>
+      <span class="is-b-s is-emphasis is-text-lab-white">Get in touch</span>
+    </a>
+  </div>
+
+  <div data-barba="wrapper">
+  <div data-barba="container" data-barba-namespace="about" data-nav-theme-root="dark">
+
+  <!-- GET IN TOUCH — MUSI być w kontenerze, nie w warstwie site-level:
+       na home ten element siedzi w .home-hero_component i ma inne pozycjonowanie
+       (absolute vs fixed). Gdyby został poza kontenerem, Barba by go nie podmieniła
+       i na jednej ze stron wyglądałby źle albo zniknął zupełnie. -->
+  <a href="#" class="contact-cta_component" data-reveal="ui" data-label="get-in-touch">
+    <span class="contact-cta_dots" aria-hidden="true"></span>
+    <span class="is-b-s is-text-lab-white contact-cta_label">Get in touch</span>
+  </a>
+
+  <main>
+    <!-- ============ HERO (Figma 4473:7766) — 1:1 z artboardu ============
+         Gradient #033030 → #005453 (30%) → #548b94; ghost-karty (ucięte,
+         opacity 15%) nad i pod tekstem; heading 80 + sub 20 mist/90. -->
+    <section class="section is-about-hero" data-label="hero">
+      <!-- warstwa gradientu (osobno od contentu): start 100vh (kryje unicorn),
+           na load zwija wysokość do docelowej (paddingi + tekst) razem z nawiasami -->
+      <div class="about-hero_bg" aria-hidden="true" data-label="gradient"></div>
+      <div class="about-hero_component">
+        <!-- ucięte karty GÓRA (widoczne dolne 20px — rounded-top, border top/l/r) -->
+        <div class="about-hero_ghost-row is-top" aria-hidden="true" data-label="nawias-górny">
+          <div class="about-hero_ghost-card"></div>
+          <div class="about-hero_ghost-card"></div>
+        </div>
+
+        <div class="about-hero_text" data-label="hero-tekst">
+          <h1 class="is-h-l is-text-lab-white about-hero_heading" data-reveal="text">
+            The company<br>behind your programs
+          </h1>
+          <p class="is-t-s about-hero_subtitle" data-reveal="text">Programs run on people. Meet ours.</p>
+        </div>
+
+        <!-- ucięte karty DÓŁ (flip pionowy — rounded-bottom, border bottom/l/r) -->
+        <div class="about-hero_ghost-row is-bottom" aria-hidden="true" data-label="nawias-dolny">
+          <div class="about-hero_ghost-card"></div>
+          <div class="about-hero_ghost-card"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ JOURNEY: unicorn (sticky shrink) + text swap + parallax obrazków ============
+         Unicorn wjeżdża pod hero na 100vw (stage 100vh), sekcja robi się sticky
+         u góry → scrub: unicorn SHRINK (scale 0.3, ląduje 20% od lewej) i odsłania
+         tekst pod spodem; w trakcie wlatują zdjęcia. Wysokość ustawia JS. -->
+    <section class="section is-about-journey" data-label="journey">
+      <div class="about-journey_stage" data-label="stage">
+
+        <!-- unicorn — warstwa w stage'u; sam embed Unicorn Studio (bez fallbacku:
+             migał przy ładowaniu, usunięty na prośbę Tomka) -->
+        <div class="about-journey_unicorn" aria-hidden="true" data-label="unicorn">
+          <!-- inner = scena w stałych proporcjach viewportu, COVER w zmniejszającym się
+               wrapperze (counter-scale liczy JS) — wrapper zmienia RATIO do 332×432 -->
+          <div class="about-journey_unicorn-inner">
+            <div class="about-journey_unicorn-embed" data-us-project="q9HPEGq5MFGVwqD8JWht"></div>
+          </div>
+        </div>
+
+        <!-- warstwa obrazków (parallax) — PLACEHOLDERY, podmienimy na assety -->
+        <div class="about-journey_images" aria-hidden="true">
+          <div class="about-journey_image is-img-city" data-label="img-city"><div class="about-journey_image-inner"></div></div>
+          <div class="about-journey_image is-img-vials" data-label="img-vials"><div class="about-journey_image-inner"></div></div>
+          <div class="about-journey_image is-img-abstract" data-label="img-abstract"><div class="about-journey_image-inner"></div></div>
+          <div class="about-journey_image is-img-hand" data-label="img-hand"><div class="about-journey_image-inner"></div></div>
+        </div>
+
+        <!-- teksty — 2 STANY, każdy WYŚRODKOWANY w 100vh (flex column center + gap):
+             heading + slot na diament + caption. Wspólny diament rysowany osobno,
+             JS ustawia jego Y na środek slotu aktywnego stanu (przy swapie jedzie
+             transformem Y do slotu stanu 2 + rotate). -->
+        <div class="about-journey_text-wrap" data-label="teksty">
+          <div class="about-journey_state is-state-1">
+            <h2 class="is-h-m is-text-lab-white about-journey_heading" data-reveal="journey-1">
+              From Zug, Switzerland, we&nbsp;take programs from concept to commercial supply.
+            </h2>
+            <span class="about-journey_diamond-slot" aria-hidden="true"></span>
+            <p class="is-b-m about-journey_caption" data-reveal="journey-1">
+              In-house leadership directing a partner<br>network as one system.
+            </p>
+          </div>
+          <div class="about-journey_state is-state-2">
+            <h2 class="is-h-m is-text-lab-white about-journey_heading" data-reveal="journey-2">
+              One strong legacy, redesigned as the next generation of biosimilar execution.
+            </h2>
+            <span class="about-journey_diamond-slot" aria-hidden="true"></span>
+            <p class="is-b-m about-journey_caption" data-reveal="journey-2">
+              Polpharma Biologics is built for speed,<br>flexibility, and smart execution.
+            </p>
+          </div>
+          <div class="about-journey_diamond" aria-hidden="true" data-label="diament">
+            <img src="assets/green-shape.svg" alt="" />
+          </div>
+        </div>
+
+        <!-- czarny overlay — narasta gdy Purpose zaczyna overlapować -->
+        <div class="about-journey_overlay" aria-hidden="true" data-label="overlay"></div>
+
+      </div>
+    </section>
+
+    <!-- ============ PURPOSE (screen 5) — STATYCZNA, overlapuje journey ============ -->
+    <!-- data-nav-theme="light": jasna sekcja = styk dla arbitra nava (nav-v2.js).
+         Zastępuje lokalny initNavMask() z about.js. -->
+    <section class="section is-about-purpose" data-nav-theme="light" data-label="purpose">
+      <div class="container">
+        <h1 class="is-h-l is-text-deep-green about-purpose_heading" data-reveal="purpose">
+          Purpose-built<br>for partners
+        </h1>
+
+        <div class="about-purpose_intro">
+          <p class="is-caption is-text-deep-green is-emphasis about-purpose_label" data-reveal="purpose">
+            <span class="about-purpose_label-dot" aria-hidden="true"></span>WHAT WE DO
+          </p>
+          <p class="is-t-l is-text-deep-green about-purpose_intro-text" data-reveal="purpose">
+            Biologic medicines can change lives, but only if patients can reliably
+            access them. Our purpose is to expand access to high-quality biologic
+            therapies by building biosimilars designed for durability, affordability,
+            and long-term supply.
+          </p>
+        </div>
+
+        <div class="about-purpose_grid">
+          <!-- karta zdjęciowa — PLACEHOLDER (fiolka w kole) -->
+          <div class="about-purpose_media" aria-hidden="true">
+            <div class="about-purpose_media-circle"></div>
+          </div>
+
+          <div class="about-purpose_capabilities">
+            <p class="is-caption is-text-deep-green is-emphasis about-purpose_label" data-reveal="purpose-list">
+              <span class="about-purpose_label-dot" aria-hidden="true"></span>OUR CAPABILITIES
+            </p>
+            <ul class="about-purpose_list">
+              <li class="about-purpose_item" data-reveal="purpose-list">
+                <span class="is-b-m is-text-deep-green about-purpose_item-number">1</span>
+                <span class="is-t-m is-text-deep-green">Development &amp; Manufacturing</span>
+              </li>
+              <li class="about-purpose_item" data-reveal="purpose-list">
+                <span class="is-b-m is-text-deep-green about-purpose_item-number">2</span>
+                <span class="is-t-m is-text-deep-green">Clinical development</span>
+              </li>
+              <li class="about-purpose_item" data-reveal="purpose-list">
+                <span class="is-b-m is-text-deep-green about-purpose_item-number">3</span>
+                <span class="is-t-m is-text-deep-green">Regulatory affairs</span>
+              </li>
+              <li class="about-purpose_item" data-reveal="purpose-list">
+                <span class="is-b-m is-text-deep-green about-purpose_item-number">4</span>
+                <span class="is-t-m is-text-deep-green">Quality</span>
+              </li>
+              <li class="about-purpose_item" data-reveal="purpose-list">
+                <span class="is-b-m is-text-deep-green about-purpose_item-number">5</span>
+                <span class="is-t-m is-text-deep-green">PM, ALM, LCM, IP</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TIMELINE / TRACK RECORD (prototyp z _code/track-record/, NA RAZIE na dole) ============ -->
+    <section class="section is-track-record" data-nav-theme="light" data-label="track-record">
+      <h2 class="is-h-m is-text-deep-green track-record_intro" data-label="intro">
+        Proven in practice. A track record built over decades of GMP and regulatory delivery.
+      </h2>
+      <div class="track-record_layout" data-label="layout">
+        <div class="track-record_left" data-label="lewa-kolumna">
+          <h3 class="is-t-l track-record_heading" data-track-color>
+            Our efficient operating model advances biosimilar programs and supports partners through approval and long-term supply.
+          </h3>
+          <span class="track-record_diamond" aria-hidden="true" data-label="diament">
+            <svg viewBox="0 0 48 48" fill="none"><rect x="11" y="11" width="26" height="26" rx="8" transform="rotate(45 24 24)" stroke="currentColor" stroke-width="2"/></svg>
+          </span>
+        </div>
+        <div class="track-record_right" data-label="prawa-strefa">
+          <div class="track-record_track" data-label="tor">
+            <div class="track-record_col" data-label="wpis-1935">
+              <div>
+                <p class="is-caption track-record_dates"><span>1935</span><span class="track-record_dates-dot"></span><span>2019</span></p>
+                <p class="is-b-s is-text-deep-green track-record_body is-narrow">
+                  Decades of GMP manufacturing, regulatory expertise, and global partnerships, built through Polpharma.
+                </p>
+              </div>
+              <div class="track-record_media" data-media="petri" data-label="img-petri"><span class="is-caption track-record_media-label">IMG — petri / pipeta</span></div>
+            </div>
+            <div class="track-record_col" data-label="wpis-fiolki-2013">
+              <div class="track-record_circle" data-label="img-fiolki">
+                <div class="track-record_media"><span class="is-caption track-record_media-label">IMG — fiolki 3D</span></div>
+              </div>
+              <div>
+                <p class="is-caption track-record_dates"><span>2013</span><span class="track-record_dates-dot"></span><span>2016</span></p>
+                <p class="is-b-s is-text-deep-green track-record_body">
+                  Entry into biologics, with dedicated R&amp;D and development capabilities established to advance biosimilar programs
+                </p>
+              </div>
+            </div>
+            <div class="track-record_col" data-wide data-label="wpis-2019">
+              <div>
+                <p class="is-caption track-record_dates"><span>2019</span></p>
+                <p class="is-b-s is-text-deep-green track-record_body">
+                  First out-licensing agreements signed for biosimilar programs
+                </p>
+              </div>
+              <div class="track-record_media" data-media="water" data-label="img-water"><span class="is-caption track-record_media-label">IMG — woda / bąbelki</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  </div><!-- koniec kontenera strony -->
+  </div><!-- koniec wrappera -->
+
+  <!-- ============================================================
+       FLAGA HARNESSU — przed modułami stron/sekcji (patrz index.html).
+       ============================================================ -->
+  <script>window.__PPB_BARBA__ = true;</script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <!-- SplitText — globalny line-reveal (jsdelivr, jak na home) -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <!-- WARSTWA GLOBALNA: config (PPB.config) + system #1 line-reveal (_shared).
+       Animacje tekstów (revealText/hideText/revealOnScroll) = jedno źródło.
+       KOLEJNOŚĆ 1:1 Z HOME — obie strony dzielą te same skrypty trwałe. -->
+  <script src="../_shared/gsap-config.js"></script>
+  <script src="../_shared/reveal.js?v=20260728-sf1"></script>
+  <script src="../_shared/highlight.js"></script>   <!-- system #4: używa go track-record -->
+  <script src="../_shared/swap.js"></script>   <!-- system #3: swap-in-place (po reveal.js) -->
+  <!-- NAV v2: klon maski + arbiter motywu; PRZED nav-shape/nav-menu.
+       About jedzie teraz na tym samym arbitrze co home (był własny initNavMask). -->
+  <script src="nav-v2.js?v=20260729-081453"></script>
+  <!-- generator kształtu navbara (komponent, obie instancje: dark + light w masce) -->
+  <script src="../_shared/nav/nav-shape.js"></script>
+  <script src="../_shared/nav/nav-menu.js"></script>
+  <script src="../_shared/nav/nav-mask.js"></script>
+  <script src="../_shared/site-footer/site-footer.js"></script>
+  <!-- Unicorn Studio (oficjalny snippet, v2.1.9 — jak na home) -->
+  <script type="text/javascript">!function(){var u=window.UnicornStudio;if(u&&u.init){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){u.init()})}else{u.init()}}else{window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.9/dist/unicornStudio.umd.js",i.onload=function(){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){UnicornStudio.init()})}else{UnicornStudio.init()}},(document.head||document.body).appendChild(i)}}();</script>
+  <!-- ============================================================
+       PEŁNA UNIA MODUŁÓW (audyt 2026-07-29) — IDENTYCZNA jak w index.html.
+       Barba NIE wykonuje skryptów z podmienianego dokumentu; okno ma na
+       zawsze tylko skrypty strony WEJŚCIOWEJ. Wejście przez about i przejście
+       na home dawało MARTWY home (brak PPB.pages.home). Moduły są bezpieczne
+       do ładowania na każdej stronie: rejestrują tylko kontrakty, DOM ruszają
+       dopiero w init(). Parytetu list pilnuje verify.js, sekcja 4e.
+       ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <script src="loader-01d.js?v=20260729-081453"></script>
+  <script src="script.js?v=20260729-081453"></script>
+  <script src="../_shared/video-scrub.js"></script>
+  <script src="key-pillars.js?v=20260729-081453"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+  <script src="meet-swiper.js?v=20260729-081453"></script>
+  <script src="insights.js?v=20260729-081453"></script>
+  <script src="about.js?v=20260729-081453"></script>
+  <!-- sekcja timeline (track-record) — ma już kontrakt PPB.pages.trackRecord;
+       pod harnessem NIE bootuje się sama, wywołuje ją about.js -->
+  <script src="../track-record/script.js"></script>
+
+  <!-- ============================================================
+       WARSTWA TRWAŁA: smooth scroll + page transitions (1:1 z index.html).
+       ⚠️ Barba wymaga serwera HTTP (fetch kolejnej strony).
+       ============================================================ -->
+  <script src="vendor/lenis.min.js"></script>
+  <script src="vendor/barba.umd.js"></script>
+  <script src="smooth-lenis.js?v=20260729-081453"></script>
+  <script src="transition.js?v=20260729-081453"></script>
+</body>
+</html>
